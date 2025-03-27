@@ -10,14 +10,12 @@ class UserController(BaseController[User]):
 
     def create_user(self, data: dict) -> User:
         try:
-            salt = bcrypt.gensalt()
-            hashed_password = bcrypt.generate_password_hash(data['password'] + str(salt))
+            hashed_password = bcrypt.generate_password_hash(data['password'])
             
             new_user = self.create({
                 'name': data['name'],
                 'email': data['email'],
                 'password': hashed_password,
-                'salt': salt,
                 'phone': data.get('phone'),
                 'type': data.get('type', 'client')
             })

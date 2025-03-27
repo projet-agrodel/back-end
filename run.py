@@ -4,8 +4,6 @@ import os
 
 load_dotenv()
 
-os.environ["DATABASE_URL"] = "sqlite:///db-teste.db"
-
 app = create_app()
 
 if __name__ == '__main__':

@@ -6,23 +6,25 @@ from app.models.user import User
 class UserRoutesTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls):    
-        cls.app = create_app('testing')  # Configuração específica para testes
+    def setUp(cls):    
+        cls.app = create_app()  # Configuração específica para testes
         cls.client = cls.app.test_client()
 
         with cls.app.app_context():
+            db.drop_all()
             db.create_all()
             cls.inserir_dados_fixos()
 
     @classmethod
-    def tearDownClass(cls):    
+    def tearDown(cls):    
         with cls.app.app_context():
             db.drop_all()
+            db.session.remove()
 
     @classmethod
     def inserir_dados_fixos(cls):    
-        admin = User(name="Admin", email="admin@email.com", password="admin123", phone="11999999999", salt="123", type="admin")
-        user = User(name="User", email="user@email.com", password="user123", phone="11888888888", salt="123", type="user")
+        admin = User(name="Admin", email="admin@email.com", password="admin123", phone="11999999999", type="admin")
+        user = User(name="User", email="user@email.com", password="user123", phone="11888888888", type="user")
         db.session.add_all([admin, user])
         db.session.commit()
 
@@ -34,11 +36,11 @@ class UserRoutesTest(unittest.TestCase):
             "email": "novo@email.com",
             "password": "senha123",
             "phone": "11912345678",
-            "salt": "random_salt",
             "type": "user"
         })
-        self.assertEqual(response.status_code, 201)
+
         self.assertIn("Usuário criado com sucesso", response.get_json()["message"])
+        self.assertEqual(response.status_code, 201)
 
     def test_criar_usuario_faltando_dados(self):    
         response = self.client.post('/users', json={

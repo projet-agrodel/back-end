@@ -12,9 +12,9 @@ def create_user() -> tuple[Any, int]:
     try:
         data = request.get_json()
         user = controller.users.create_user(data)
-        return jsonify({'message': 'Usuário criado com sucesso', 'id': user.id}), 201
+        return jsonify({'message': 'Usuário criado com sucesso', 'id': user.id }), 201
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({'message': str(e)}), 400
 
 @bp.route('/users', methods=['GET'])
 def get_users() -> tuple[Any, int]:

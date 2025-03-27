@@ -1,4 +1,5 @@
 import unittest
+import json
 from app import create_app, db
 from app.models.user import User
 from app.models.product import Product
@@ -6,25 +7,23 @@ from app.models.product import Product
 class ProductRoutesTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls):
-        cls.app = create_app('testing')  # Configuração específica para testes
+    def setUp(cls):
+        cls.app = create_app()  # Configuração específica para testes
         cls.client = cls.app.test_client()
 
         with cls.app.app_context():
+            db.drop_all() 
             db.create_all()
             cls.inserir_dados_fixos()
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDown(cls):
         with cls.app.app_context():
             db.drop_all()
+            db.session.remove()
 
     @classmethod
     def inserir_dados_fixos(cls):
-        admin = User(name="Admin", email="admin@email.com", password="admin123", phone="11999999999", salt="123", type="admin")
-        db.session.add(admin)
-        db.session.commit()
-
         produtos = [
             Product(name="Teclado Mecânico", description="Teclado RGB", price=299.99, stock=50),
             Product(name="Mouse Gamer", description="Mouse óptico", price=199.99, stock=30)
@@ -57,6 +56,7 @@ class ProductRoutesTest(unittest.TestCase):
 
     def test_buscar_produto_existente(self):
         response = self.client.get('/products/1')
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()["name"], "Teclado Mecânico")
 

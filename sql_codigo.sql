@@ -3,7 +3,6 @@ CREATE TABLE user (
     name VARCHAR(255),
     email VARCHAR(255) UNIQUE,
     password VARCHAR(255),
-    salt VARCHAR(255),
     phone VARCHAR(20),
     type ENUM('admin', 'client'),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
