@@ -8,8 +8,6 @@ bp = Blueprint('products', __name__)
 controller = MainController()
 
 @bp.route('/products', methods=['POST'])
-@jwt_required()
-@admin_required()
 def create_product() -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -44,8 +42,6 @@ def get_product(product_id: int) -> tuple[Any, int]:
     return jsonify(product.to_dict()), 200
 
 @bp.route('/products/<int:product_id>', methods=['PUT'])
-@jwt_required()
-@admin_required()
 def update_product(product_id: int) -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -57,8 +53,6 @@ def update_product(product_id: int) -> tuple[Any, int]:
         return jsonify({'error': str(e)}), 400
 
 @bp.route('/products/<int:product_id>/stock', methods=['PATCH'])
-@jwt_required()
-@admin_required()
 def update_stock(product_id: int) -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -71,8 +65,6 @@ def update_stock(product_id: int) -> tuple[Any, int]:
         return jsonify({'error': str(e)}), 400
 
 @bp.route('/products/<int:product_id>', methods=['DELETE'])
-@jwt_required()
-@admin_required()
 def delete_product(product_id: int) -> tuple[Any, int]:
     try:
         if controller.products.delete(product_id):

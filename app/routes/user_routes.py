@@ -8,8 +8,6 @@ bp = Blueprint('users', __name__)
 controller = MainController()
 
 @bp.route('/users', methods=['POST'])
-@jwt_required()
-@admin_required()
 def create_user() -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -19,8 +17,6 @@ def create_user() -> tuple[Any, int]:
         return jsonify({'error': str(e)}), 400
 
 @bp.route('/users', methods=['GET'])
-@jwt_required()
-@admin_required()
 def get_users() -> tuple[Any, int]:
     query = request.args.get('query')
     user_type = request.args.get('type')
@@ -32,36 +28,18 @@ def get_users() -> tuple[Any, int]:
     else:
         users = controller.users.get_all()
 
-    return jsonify([{
-        'id': user.id,
-        'name': user.name,
-        'email': user.email,
-        'phone': user.phone,
-        'type': user.type
-    } for user in users]), 200
+    return jsonify([user.to_dict() for user in users]), 200
 
 @bp.route('/users/<int:user_id>', methods=['GET'])
-@jwt_required()
 def get_user(user_id: int) -> tuple[Any, int]:
     user = controller.users.get_by_id(user_id)
     if not user:
         return jsonify({'error': 'Usuário não encontrado'}), 404
 
-    return jsonify({
-        'id': user.id,
-        'name': user.name,
-        'email': user.email,
-        'phone': user.phone,
-        'type': user.type
-    }), 200
+    return jsonify(user.to_dict()), 200
 
 @bp.route('/users/<int:user_id>', methods=['PUT'])
-@jwt_required()
 def update_user(user_id: int) -> tuple[Any, int]:
-    current_user_id = get_jwt_identity()
-    if current_user_id != user_id:
-        return jsonify({'error': 'Não autorizado'}), 403
-
     try:
         data = request.get_json()
         user = controller.users.update_user(user_id, data)
@@ -72,8 +50,6 @@ def update_user(user_id: int) -> tuple[Any, int]:
         return jsonify({'error': str(e)}), 400
 
 @bp.route('/users/<int:user_id>', methods=['DELETE'])
-@jwt_required()
-@admin_required()
 def delete_user(user_id: int) -> tuple[Any, int]:
     try:
         if controller.users.delete(user_id):

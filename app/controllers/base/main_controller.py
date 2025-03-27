@@ -7,7 +7,6 @@ class MainController:
         self._user_controller: UserController = UserController()
         self._product_controller: ProductController = ProductController()
 
-
     @property
     def users(self) -> UserController:
         return self._user_controller
