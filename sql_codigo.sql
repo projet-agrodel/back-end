@@ -89,3 +89,26 @@ CREATE TABLE pedido_item (
     FOREIGN KEY (pedido_id) REFERENCES pedido(id) ON DELETE CASCADE,
     FOREIGN KEY (produto_id) REFERENCES produto(id) ON DELETE CASCADE
 );
+
+-- Tabelas de Tickets
+CREATE TABLE ticket (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    status ENUM('Aberto', 'Em Andamento', 'Resolvido', 'Fechado') DEFAULT 'Aberto',
+    priority ENUM('Baixa', 'Média', 'Alta', 'Urgente') DEFAULT 'Média',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+);
+
+CREATE TABLE ticket_message (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ticket_id INT,
+    user_id INT,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (ticket_id) REFERENCES ticket(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+);
