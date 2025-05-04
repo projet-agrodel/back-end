@@ -17,17 +17,17 @@ def create_app(config_class=Config):
     # Importa e registra as blueprints
     from .routes import (
         user_routes, product_routes, ticket_routes,
-        category_routes, cart_routes, order_routes,
-        payment_routes, card_routes
+        category_routes, order_routes, payment_routes,
+        cart_routes, card_routes
     )
 
     app.register_blueprint(user_routes.bp)
     app.register_blueprint(product_routes.bp)
     app.register_blueprint(ticket_routes.bp)
     app.register_blueprint(category_routes.bp)
-    app.register_blueprint(cart_routes.bp)
     app.register_blueprint(order_routes.bp)
     app.register_blueprint(payment_routes.bp)
+    app.register_blueprint(cart_routes.bp)
     app.register_blueprint(card_routes.bp)
 
     return app 

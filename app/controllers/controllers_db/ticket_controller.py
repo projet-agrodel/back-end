@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict
-from app.models.ticket import Ticket, TicketMessage, TicketAttachment
+from app.models.ticket import Ticket, TicketMessage
 from app.controllers.base.base_controller import BaseController
 from app import db
 import os

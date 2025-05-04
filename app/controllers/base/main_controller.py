@@ -1,6 +1,6 @@
 from ..controllers_db.user_controller import UserController
 from ..controllers_db.product_controller import ProductController
-from ..controllers_db.ticket_controller import TicketController, TicketMessageController, TicketAttachmentController
+from ..controllers_db.ticket_controller import TicketController, TicketMessageController
 from ..controllers_db.card_controller import CardController
 from ..controllers_db.cart_controller import CartController
 from ..controllers_db.order_controller import OrderController
