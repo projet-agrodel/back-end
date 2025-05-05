@@ -1,8 +1,7 @@
 from typing import Optional, List
-from app.models.user import User
-from app.controllers.base.base_controller import BaseController
-from app import bcrypt
-from app import db
+from ...models.user import User, UserType
+from ..base.base_controller import BaseController
+from ...extensions import bcrypt, db
 
 class UserController(BaseController[User]):
     def __init__(self) -> None:
@@ -12,12 +11,18 @@ class UserController(BaseController[User]):
         try:
             hashed_password = bcrypt.generate_password_hash(data['password'])
             
+            user_type_str = data.get('type', 'user')
+            try:
+                user_type_enum = UserType[user_type_str]
+            except KeyError:
+                user_type_enum = UserType.user
+
             new_user = self.create({
                 'name': data['name'],
                 'email': data['email'],
                 'password': hashed_password,
                 'phone': data.get('phone'),
-                'type': data.get('type', 'client')
+                'type': user_type_enum
             })
             return new_user
         except Exception as e:
@@ -33,10 +38,13 @@ class UserController(BaseController[User]):
             if not user:
                 return None
 
-            if 'password' in data:
-                salt = bcrypt.gensalt()
-                data['password'] = bcrypt.generate_password_hash(data['password'] + str(salt))
-                data['salt'] = salt
+            if 'password' in data and data['password']:
+                hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+                data['password'] = hashed_password
+                if 'salt' in data:
+                    del data['salt']
+            elif 'salt' in data:
+                del data['salt']
 
             return self.update(user_id, data)
         except Exception as e:
