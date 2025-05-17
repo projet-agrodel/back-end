@@ -85,4 +85,17 @@ def change_password() -> tuple[Any, int]:
             return jsonify({'message': 'Não foi possível alterar a senha. Verifique sua senha atual.'}), 400
             
     except Exception as e:
-        return jsonify({'message': str(e)}), 500 
+        return jsonify({'message': str(e)}), 500
+
+@bp.route('/user/profile', methods=['GET'])
+@jwt_required()
+def get_user_profile() -> tuple[Any, int]:
+    try:
+        user_id = get_jwt_identity()
+        user = controller.users.get_by_id(user_id)
+        if not user:
+            return jsonify({'message': 'Usuário não encontrado.'}), 404
+        
+        return jsonify(user.to_dict()), 200
+    except Exception as e:
+        return jsonify({'message': 'Erro ao buscar informações do perfil.'}), 500 

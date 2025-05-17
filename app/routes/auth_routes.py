@@ -25,10 +25,15 @@ def login():
         # Verificar se usuário existe e a senha está correta
         if user and bcrypt.check_password_hash(user.password, password):
             # Senha correta, gerar token JWT
-            # A identidade do token pode ser o ID do usuário ou o email
+            # A identidade do token deve ser uma string.
             # O tempo de expiração pode ser configurado globalmente ou aqui
-            access_token = create_access_token(identity=user.id) # Usando ID como identidade
-            return jsonify(access_token=access_token), 200
+            access_token = create_access_token(identity=str(user.id)) # Convertendo user.id para string
+            user_data_for_response = {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email
+            }
+            return jsonify(access_token=access_token, user=user_data_for_response), 200
         else:
             # Usuário não encontrado ou senha incorreta
             return jsonify({"message": "Credenciais inválidas"}), 401
