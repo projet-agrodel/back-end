@@ -2,6 +2,7 @@ from typing import Optional, List
 from ...models.user import User, UserType
 from ..base.base_controller import BaseController
 from ...extensions import bcrypt, db
+from datetime import datetime
 
 class UserController(BaseController[User]):
     def __init__(self) -> None:
@@ -31,6 +32,9 @@ class UserController(BaseController[User]):
 
     def get_by_email(self, email: str) -> Optional[User]:
         return self.get_query().filter_by(email=email).first()
+
+    def get_by_reset_token(self, token: str) -> Optional[User]:
+        return self.get_query().filter_by(reset_password_token=token).filter(User.reset_password_expiration > datetime.utcnow()).first()
 
     def update_user(self, user_id: int, data: dict) -> Optional[User]:
         try:

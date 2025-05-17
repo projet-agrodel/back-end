@@ -3,7 +3,8 @@ from flask import Flask
 from flask_cors import CORS
 from .config import Config
 # Importar instâncias das extensões
-from .extensions import db, bcrypt, jwt
+from .extensions import db, bcrypt, jwt, mail
+from flask_migrate import Migrate
 # Importar funções do DB Manager
 from .services.database_manager import criar_tabelas, inserir_categorias, inserir_produtos
 
@@ -26,6 +27,8 @@ def create_app(config_class=Config):
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
+    Migrate(app, db)
+    mail.init_app(app)
 
     # Importa e registra as blueprints ANTES de create_all
     from .routes import (

@@ -15,6 +15,8 @@ class User(db.Model):
     type = db.Column(db.Enum(UserType), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    reset_password_token = db.Column(db.String(100), nullable=True, unique=True)
+    reset_password_expiration = db.Column(db.DateTime, nullable=True)
 
     def to_dict(self):
         return {
