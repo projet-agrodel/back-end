@@ -56,4 +56,33 @@ def delete_user(user_id: int) -> tuple[Any, int]:
             return jsonify({'message': 'Usuário deletado com sucesso'}), 200
         return jsonify({'error': 'Usuário não encontrado'}), 404
     except Exception as e:
-        return jsonify({'error': str(e)}), 400 
+        return jsonify({'error': str(e)}), 400
+
+@bp.route('/user/change-password', methods=['POST'])
+@jwt_required()
+def change_password() -> tuple[Any, int]:
+    try:
+        user_id = get_jwt_identity()
+        data = request.get_json()
+        current_password = data.get('currentPassword')
+        new_password = data.get('newPassword')
+        confirm_password = data.get('confirmPassword')
+
+        if not all([current_password, new_password, confirm_password]):
+            return jsonify({'message': 'Todos os campos são obrigatórios.'}), 400
+
+        if new_password != confirm_password:
+            return jsonify({'message': 'A nova senha e a confirmação não coincidem.'}), 400
+
+        # Lógica para verificar a senha atual e atualizar para a nova senha
+        # Isso será movido para o controller
+        success = controller.users.change_password(user_id, current_password, new_password)
+        
+        if success:
+            return jsonify({'message': 'Senha alterada com sucesso.'}), 200
+        else:
+            # A mensagem de erro específica virá do controller
+            return jsonify({'message': 'Não foi possível alterar a senha. Verifique sua senha atual.'}), 400
+            
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500 

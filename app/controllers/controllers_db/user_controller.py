@@ -75,4 +75,23 @@ class UserController(BaseController[User]):
             return True
         except Exception as e:
             db.session.rollback()
-            raise e 
+            raise e
+
+    def change_password(self, user_id: int, current_password: str, new_password: str) -> bool:
+        try:
+            user = self.get_by_id(user_id)
+            if not user:
+                return False # Usuário não encontrado
+
+            if not bcrypt.check_password_hash(user.password, current_password):
+                return False # Senha atual incorreta
+
+            hashed_new_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+            
+            user.password = hashed_new_password
+            self._db.session.commit()
+            return True
+        except Exception as e:
+            self._db.session.rollback()
+            # Logar o erro e.g., app.logger.error(f"Erro ao alterar senha: {str(e)}")
+            return False 
