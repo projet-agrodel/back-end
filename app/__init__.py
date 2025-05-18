@@ -6,7 +6,7 @@ from .config import Config
 from .extensions import db, bcrypt, jwt, mail
 from flask_migrate import Migrate
 # Importar funções do DB Manager
-from .services.database_manager import criar_tabelas, inserir_categorias, inserir_produtos
+from .services.database_manager import criar_tabelas, inserir_categorias, inserir_produtos, inserir_usuarios
 
 def create_app(config_class=Config):
     app = Flask(__name__, instance_relative_config=False) # Garantir que instance folder não interfira
@@ -51,7 +51,6 @@ def create_app(config_class=Config):
         criar_tabelas(app)
         inserir_categorias(app)
         inserir_produtos(app)
-        # Você pode adicionar a chamada para inserir_usuarios(app) aqui se quiser
-        # inserir_usuarios(app)
+        inserir_usuarios(app)
 
     return app 

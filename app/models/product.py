@@ -9,6 +9,10 @@ class Product(db.Model):
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(255), nullable=False)
     price = db.Column(db.Numeric(10,2), nullable=False)
+    originalPrice = db.Column(db.Numeric(10,2), nullable=True)
+    imageUrl = db.Column(db.String(500), nullable=True)
+    status = db.Column(db.String(50), default='Ativo', nullable=False)
+    isPromotion = db.Column(db.Boolean, default=False, nullable=False)
     stock = db.Column(db.Integer, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('categoria.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -24,5 +28,11 @@ class Product(db.Model):
             'description': self.description,
             'price': float(self.price),
             'stock': self.stock,
-            'category': category_data
+            'category': category_data,
+            'originalPrice': float(self.originalPrice) if self.originalPrice is not None else None,
+            'imageUrl': self.imageUrl,
+            'status': self.status,
+            'isPromotion': self.isPromotion,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
         } 

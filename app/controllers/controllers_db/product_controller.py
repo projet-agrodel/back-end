@@ -11,11 +11,76 @@ class ProductController(BaseController[Product]):
 
     def create_product(self, data: dict) -> Product:
         try:
-            if 'price' in data:
-                data['price'] = Decimal(str(data['price']))
-                
-            new_product = self.create(data)
+            if 'price' in data and data['price'] is not None:
+                try:
+                    data['price'] = Decimal(str(data['price']))
+                except Exception as e:
+                    pass 
+            
+            if 'originalPrice' in data and data['originalPrice'] is not None:
+                try:
+                    data['originalPrice'] = Decimal(str(data['originalPrice']))
+                except Exception as e:
+                    pass 
+
+            if 'isPromotion' in data and not isinstance(data['isPromotion'], bool):
+                data['isPromotion'] = str(data['isPromotion']).lower() in ['true', '1', 't']
+
+            if 'status' in data and data['status'] not in ['Ativo', 'Inativo']:
+                if not isinstance(data['status'], str) or data['status'] not in ['Ativo', 'Inativo']:
+                     data.pop('status', None)
+
+            new_product = self.create(data) # self.create é do BaseController
             return new_product
+        except Exception as e:
+            self._db.session.rollback()
+            raise e
+
+    def update_product(self, product_id: int, data: dict) -> Optional[Product]:
+        try:
+            product = self.get_by_id(product_id)
+            if not product:
+                return None
+
+            if 'price' in data and data['price'] is not None:
+                try:
+                    product.price = Decimal(str(data['price']))
+                except Exception as e:
+                    # Considerar levantar um erro se a conversão falhar
+                    pass # ou raise ValueError(f"Valor inválido para preço: {data['price']}")
+            elif 'price' in data and data['price'] is None:
+                product.price = None # Permitir definir o preço como nulo se o modelo permitir
+
+            if 'originalPrice' in data and data['originalPrice'] is not None:
+                try:
+                    product.originalPrice = Decimal(str(data['originalPrice']))
+                except Exception as e:
+                    pass
+            elif 'originalPrice' in data and data['originalPrice'] is None:
+                product.originalPrice = None
+
+            if 'isPromotion' in data:
+                if isinstance(data['isPromotion'], bool):
+                    product.isPromotion = data['isPromotion']
+                else:
+                    product.isPromotion = str(data['isPromotion']).lower() in ['true', '1', 't']
+            
+            if 'status' in data and data['status'] is not None:
+                if data['status'] in ['Ativo', 'Inativo']:
+                    product.status = data['status']
+                else:
+                    pass 
+            elif 'status' in data and data['status'] is None:
+                 pass
+
+            # Para outros campos que não precisam de tratamento especial:
+            allowed_fields = ['name', 'description', 'stock', 'category_id', 'imageUrl'] 
+            for field in allowed_fields:
+                if field in data:
+                    setattr(product, field, data[field])
+            
+            self.save(product) # self.save() é do BaseController
+            return product
         except Exception as e:
             self._db.session.rollback()
             raise e
