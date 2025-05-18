@@ -95,20 +95,9 @@ def reset_password(token):
     user = controller.users.get_by_reset_token(token) # Assume que você adicionará este método ao controller
 
     if not user:
+        # Esta mensagem já cobre token não encontrado ou token que foi encontrado mas estava expirado (conforme lógica do get_by_reset_token)
         return jsonify({"message": "Token inválido ou expirado."}), 400
         
-    # Verificar se o token não expirou (redundante se get_by_reset_token já verificar, mas bom para clareza)
-    if user.reset_password_expiration < datetime.utcnow():
-        # Invalidar token se expirado e ainda não tratado pelo get_by_reset_token
-        user.reset_password_token = None
-        user.reset_password_expiration = None
-        try:
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            print(f"Erro ao limpar token expirado: {e}")
-            # Não precisa notificar o usuário sobre este erro interno especificamente
-        return jsonify({"message": "Token expirado."}), 400
 
     # Atualizar a senha
     hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
