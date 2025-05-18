@@ -4,10 +4,11 @@ from app.controllers.base.main_controller import MainController
 from app.utils.decorators import admin_required
 from typing import Any
 
-bp = Blueprint('products', __name__)
+bp = Blueprint('admin_products', __name__, url_prefix='/admin')
 controller = MainController()
 
 @bp.route('/products', methods=['POST'])
+@admin_required()
 def create_product() -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -17,6 +18,7 @@ def create_product() -> tuple[Any, int]:
         return jsonify({'error': str(e)}), 400
 
 @bp.route('/products', methods=['GET'])
+@admin_required()
 def get_products() -> tuple[Any, int]:
     query = request.args.get('q')
     min_price_str = request.args.get('minPrice')
@@ -50,6 +52,7 @@ def get_products() -> tuple[Any, int]:
         return jsonify({'error': "Erro interno ao buscar produtos."}), 500
 
 @bp.route('/products/<int:product_id>', methods=['GET'])
+@admin_required()
 def get_product(product_id: int) -> tuple[Any, int]:
     product = controller.products.get_by_id(product_id)
     if not product:
@@ -57,6 +60,7 @@ def get_product(product_id: int) -> tuple[Any, int]:
     return jsonify(product.to_dict()), 200
 
 @bp.route('/products/<int:product_id>', methods=['PUT'])
+@admin_required()
 def update_product(product_id: int) -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -68,10 +72,14 @@ def update_product(product_id: int) -> tuple[Any, int]:
         return jsonify({'error': str(e)}), 400
 
 @bp.route('/products/<int:product_id>/stock', methods=['PATCH'])
+@admin_required()
 def update_stock(product_id: int) -> tuple[Any, int]:
     try:
         data = request.get_json()
-        quantity = data.get('quantity', 0)
+        quantity = data.get('quantity')
+        if quantity is None:
+            return jsonify({'error': "O campo 'quantity' é obrigatório."}), 400
+        
         product = controller.products.update_stock(product_id, quantity)
         if not product:
             return jsonify({'error': 'Produto não encontrado'}), 404
@@ -80,6 +88,7 @@ def update_stock(product_id: int) -> tuple[Any, int]:
         return jsonify({'error': str(e)}), 400
 
 @bp.route('/products/<int:product_id>', methods=['DELETE'])
+@admin_required()
 def delete_product(product_id: int) -> tuple[Any, int]:
     try:
         if controller.products.delete(product_id):
