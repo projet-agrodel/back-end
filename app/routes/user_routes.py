@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.controllers.base.main_controller import MainController
 from app.utils.decorators import admin_required
 from typing import Any
+import re # Importar o módulo re para expressões regulares
 
 bp = Blueprint('users', __name__)
 controller = MainController()
@@ -11,6 +12,20 @@ controller = MainController()
 def create_user() -> tuple[Any, int]:
     try:
         data = request.get_json()
+        password = data.get('password') # Obter a senha para validação
+
+        # Validação de campos básicos (exemplo, adicione outros se necessário)
+        if not data.get('name') or not data.get('email') or not password:
+            return jsonify({'message': 'Nome, email e senha são obrigatórios.'}), 400
+
+        # Validação de complexidade da senha no backend
+        if len(password) < 8:
+            return jsonify({'message': 'A senha deve ter pelo menos 8 caracteres.'}), 400
+        if not re.search(r"[A-Z]", password):
+            return jsonify({'message': 'A senha deve conter pelo menos uma letra maiúscula.'}), 400
+        if not re.search(r"[0-9]", password):
+            return jsonify({'message': 'A senha deve conter pelo menos um número.'}), 400
+
         user = controller.users.create_user(data)
         return jsonify({'message': 'Usuário criado com sucesso', 'id': user.id }), 201
     except Exception as e:
@@ -73,6 +88,14 @@ def change_password() -> tuple[Any, int]:
 
         if new_password != confirm_password:
             return jsonify({'message': 'A nova senha e a confirmação não coincidem.'}), 400
+
+        # Validação de complexidade da nova senha no backend
+        if len(new_password) < 8:
+            return jsonify({'message': 'A nova senha deve ter pelo menos 8 caracteres.'}), 400
+        if not re.search(r"[A-Z]", new_password):
+            return jsonify({'message': 'A nova senha deve conter pelo menos uma letra maiúscula.'}), 400
+        if not re.search(r"[0-9]", new_password):
+            return jsonify({'message': 'A nova senha deve conter pelo menos um número.'}), 400
 
         # Lógica para verificar a senha atual e atualizar para a nova senha
         # Isso será movido para o controller
