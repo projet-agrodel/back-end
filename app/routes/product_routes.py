@@ -64,7 +64,7 @@ def get_product(product_id: int) -> tuple[Any, int]:
 def update_product(product_id: int) -> tuple[Any, int]:
     try:
         data = request.get_json()
-        product = controller.products.update(product_id, data)
+        product = controller.products.update_product(product_id, data)
         if not product:
             return jsonify({'error': 'Produto não encontrado'}), 404
         return jsonify(product.to_dict()), 200
