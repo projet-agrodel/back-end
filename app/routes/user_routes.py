@@ -37,7 +37,7 @@ def create_user() -> tuple[Any, int]:
         return jsonify({'message': str(e)}), 400
 
 @bp.route('/users', methods=['GET'])
-@admin_required
+
 def get_users() -> tuple[Any, int]:
     query = request.args.get('query')
     user_type = request.args.get('type')
@@ -83,7 +83,7 @@ def update_user(user_id: int) -> tuple[Any, int]:
         return jsonify({'error': str(e)}), 400
 
 @bp.route('/users/<int:user_id>', methods=['DELETE'])
-@admin_required
+
 def delete_user(user_id: int) -> tuple[Any, int]:
     try:
         current_user_id_from_token = get_jwt_identity()

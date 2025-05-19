@@ -42,7 +42,7 @@ def get_order_payments(order_id: int) -> tuple[Any, int]:
 
 @bp.route('/payments/<int:payment_id>/status', methods=['PUT'])
 
-@admin_required
+
 def update_payment_status(payment_id: int) -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -65,7 +65,7 @@ def update_payment_status(payment_id: int) -> tuple[Any, int]:
 
 @bp.route('/payments/pending', methods=['GET'])
 
-@admin_required
+
 def get_pending_payments() -> tuple[Any, int]:
     try:
         payments = controller.payments.get_pending_payments()

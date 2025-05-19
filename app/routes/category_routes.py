@@ -8,7 +8,7 @@ controller = MainController()
 
 @bp.route('/categories', methods=['POST'])
 
-@admin_required
+
 def create_category() -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -35,7 +35,7 @@ def get_category(category_id: int) -> tuple[Any, int]:
 
 @bp.route('/categories/<int:category_id>', methods=['PUT'])
 
-@admin_required
+
 def update_category(category_id: int) -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -48,7 +48,7 @@ def update_category(category_id: int) -> tuple[Any, int]:
 
 @bp.route('/categories/<int:category_id>', methods=['DELETE'])
 
-@admin_required
+
 def delete_category(category_id: int) -> tuple[Any, int]:
     try:
         if controller.categories.delete(category_id):
