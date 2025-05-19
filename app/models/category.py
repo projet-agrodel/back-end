@@ -1,4 +1,4 @@
-from app import db
+from ..extensions import db
 from datetime import datetime
 from typing import List, Optional
 
@@ -11,7 +11,7 @@ class Category(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relacionamento com produtos
-    products = db.relationship('Product', backref='category')
+    products = db.relationship('Product', back_populates='category')
     
     def to_dict(self) -> dict:
         return {

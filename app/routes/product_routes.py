@@ -18,21 +18,36 @@ def create_product() -> tuple[Any, int]:
 
 @bp.route('/products', methods=['GET'])
 def get_products() -> tuple[Any, int]:
-    query = request.args.get('query')
-    min_price = request.args.get('min_price')
-    max_price = request.args.get('max_price')
-    in_stock = request.args.get('in_stock')
+    query = request.args.get('q')
+    min_price_str = request.args.get('minPrice')
+    max_price_str = request.args.get('maxPrice')
+    sort = request.args.get('sort')
 
-    if query:
-        products = controller.products.search_products(query)
-    elif min_price and max_price:
-        products = controller.products.get_products_by_price_range(float(min_price), float(max_price))
-    elif in_stock:
-        products = controller.products.get_products_in_stock()
-    else:
-        products = controller.products.get_all()
+    min_price = None
+    if min_price_str:
+        try:
+            min_price = float(min_price_str)
+        except ValueError:
+            return jsonify({'error': "Parâmetro 'minPrice' inválido."}), 400
+            
+    max_price = None
+    if max_price_str:
+        try:
+            max_price = float(max_price_str)
+        except ValueError:
+            return jsonify({'error': "Parâmetro 'maxPrice' inválido."}), 400
 
-    return jsonify([product.to_dict() for product in products]), 200
+    try:
+        products = controller.products.get_all(
+            query=query, 
+            min_price=min_price, 
+            max_price=max_price, 
+            sort=sort
+        )
+        return jsonify([product.to_dict() for product in products]), 200
+    except Exception as e:
+        print(f"Erro ao buscar produtos: {e}")
+        return jsonify({'error': "Erro interno ao buscar produtos."}), 500
 
 @bp.route('/products/<int:product_id>', methods=['GET'])
 def get_product(product_id: int) -> tuple[Any, int]:
@@ -45,7 +60,7 @@ def get_product(product_id: int) -> tuple[Any, int]:
 def update_product(product_id: int) -> tuple[Any, int]:
     try:
         data = request.get_json()
-        product = controller.products.update(product_id, data)
+        product = controller.products.update_product(product_id, data)
         if not product:
             return jsonify({'error': 'Produto não encontrado'}), 404
         return jsonify(product.to_dict()), 200

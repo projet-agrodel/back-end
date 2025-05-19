@@ -5,6 +5,7 @@ from ..controllers_db.card_controller import CardController
 from ..controllers_db.cart_controller import CartController
 from ..controllers_db.order_controller import OrderController
 from ..controllers_db.payment_controller import PaymentController
+from ..controllers_db.category_controller import CategoryController
 from app.services.encryption_service import EncryptionService
 
 class MainController:
@@ -19,6 +20,7 @@ class MainController:
         self._cart_controller = CartController()
         self._order_controller = OrderController()
         self._payment_controller = PaymentController()
+        self._category_controller = CategoryController()
 
     @property
     def users(self) -> UserController:
@@ -51,3 +53,7 @@ class MainController:
     @property
     def payments(self) -> PaymentController:
         return self._payment_controller
+
+    @property
+    def categories(self) -> CategoryController:
+        return self._category_controller
