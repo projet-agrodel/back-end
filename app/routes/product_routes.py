@@ -8,6 +8,7 @@ bp = Blueprint('products', __name__)
 controller = MainController()
 
 @bp.route('/products', methods=['POST'])
+@admin_required()
 def create_product() -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -46,17 +47,59 @@ def get_products() -> tuple[Any, int]:
         )
         return jsonify([product.to_dict() for product in products]), 200
     except Exception as e:
-        print(f"Erro ao buscar produtos: {e}")
+        print(f"Erro ao buscar produtos para usuário: {e}")
         return jsonify({'error': "Erro interno ao buscar produtos."}), 500
+
+@bp.route('/admin/products', methods=['GET'])
+@admin_required()
+def admin_get_products() -> tuple[Any, int]:
+    query = request.args.get('q')
+    min_price_str = request.args.get('minPrice')
+    max_price_str = request.args.get('maxPrice')
+    sort = request.args.get('sort')
+    status_filter = request.args.get('status')
+
+    min_price = None
+    if min_price_str:
+        try:
+            min_price = float(min_price_str)
+        except ValueError:
+            return jsonify({'error': "Parâmetro 'minPrice' inválido."}), 400
+            
+    max_price = None
+    if max_price_str:
+        try:
+            max_price = float(max_price_str)
+        except ValueError:
+            return jsonify({'error': "Parâmetro 'maxPrice' inválido."}), 400
+
+    try:
+        products = controller.products.get_all(
+            query=query, 
+            min_price=min_price, 
+            max_price=max_price, 
+            sort=sort, 
+            status=status_filter,
+            for_admin=True
+        )
+        return jsonify([product.to_dict() for product in products]), 200
+    except Exception as e:
+        print(f"Erro ao buscar produtos para admin: {e}")
+        return jsonify({'error': "Erro interno ao buscar produtos para admin."}), 500
 
 @bp.route('/products/<int:product_id>', methods=['GET'])
 def get_product(product_id: int) -> tuple[Any, int]:
     product = controller.products.get_by_id(product_id)
     if not product:
         return jsonify({'error': 'Produto não encontrado'}), 404
+    
+    if product.status != 'Ativo':
+        return jsonify({'error': 'Produto não disponível'}), 404
+    
     return jsonify(product.to_dict()), 200
 
 @bp.route('/products/<int:product_id>', methods=['PUT'])
+@admin_required()
 def update_product(product_id: int) -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -68,6 +111,7 @@ def update_product(product_id: int) -> tuple[Any, int]:
         return jsonify({'error': str(e)}), 400
 
 @bp.route('/products/<int:product_id>/stock', methods=['PATCH'])
+@admin_required()
 def update_stock(product_id: int) -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -80,6 +124,7 @@ def update_stock(product_id: int) -> tuple[Any, int]:
         return jsonify({'error': str(e)}), 400
 
 @bp.route('/products/<int:product_id>', methods=['DELETE'])
+@admin_required()
 def delete_product(product_id: int) -> tuple[Any, int]:
     try:
         if controller.products.delete(product_id):

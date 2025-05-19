@@ -30,7 +30,7 @@ class ProductController(BaseController[Product]):
                 if not isinstance(data['status'], str) or data['status'] not in ['Ativo', 'Inativo']:
                      data.pop('status', None)
 
-            new_product = self.create(data) # self.create é do BaseController
+            new_product = self.create(data) # self.create é do BaseController e já faz commit
             return new_product
         except Exception as e:
             self._db.session.rollback()
@@ -79,13 +79,13 @@ class ProductController(BaseController[Product]):
                 if field in data:
                     setattr(product, field, data[field])
             
-            self.save(product) # self.save() é do BaseController
+            self._db.session.commit() # ADICIONAR ESTA LINHA para persistir as alterações
             return product
         except Exception as e:
             self._db.session.rollback()
             raise e
 
-    def get_all(self, query: str = None, min_price: float = None, max_price: float = None, sort: str = None) -> List[Product]:
+    def get_all(self, query: str = None, min_price: float = None, max_price: float = None, sort: str = None, status: str = None, for_admin: bool = False) -> List[Product]:
         base_query = self.get_query()
         
         if query:
@@ -100,20 +100,34 @@ class ProductController(BaseController[Product]):
                 min_price_decimal = Decimal(str(min_price))
                 base_query = base_query.filter(Product.price >= min_price_decimal)
             except (ValueError, TypeError):
-                pass
+                pass # Ignorar filtro se o valor for inválido
 
         if max_price is not None:
             try:
                 max_price_decimal = Decimal(str(max_price))
                 base_query = base_query.filter(Product.price <= max_price_decimal)
             except (ValueError, TypeError):
-                pass
+                pass # Ignorar filtro se o valor for inválido
+        
+        # Filtro de status
+        if not for_admin: # Se não for para admin, aplicar filtro de status padrão 'Ativo'
+            # Se um status específico for passado E não for para admin, usar esse status.
+            # Caso contrário, se for para admin, o filtro de status abaixo (status explícito) pode ser usado.
+            # Ou seja, para usuários, se `status` não for passado, assume 'Ativo'.
+            # Se `status` for passado (e.g. 'Inativo') por um usuário, ele não verá nada se não for 'Ativo'
+            # A lógica aqui é que `for_admin=False` sempre tentará impor 'Ativo' a menos que `status` seja explicitamente `Ativo`.
+            # Melhor: Se não for admin, só mostrar ativos. Se for admin, permitir filtrar por status.
+            base_query = base_query.filter(Product.status == 'Ativo')
+        elif status: # Se for para admin E um status específico foi solicitado
+            base_query = base_query.filter(Product.status == status)
+        # Se for_admin e nenhum status específico, retorna todos os status.
                 
         if sort:
             if sort == 'price_asc':
                 base_query = base_query.order_by(asc(Product.price))
             elif sort == 'price_desc':
                 base_query = base_query.order_by(desc(Product.price))
+            # Adicionar mais opções de sort se necessário (ex: nome, data)
 
         return base_query.all()
 
@@ -126,7 +140,7 @@ class ProductController(BaseController[Product]):
             raise ValueError("Estoque não pode ser negativo")
             
         product.stock += quantity
-        self.save(product)
+        self._db.session.commit()
         return product
 
     def search_products(self, query: str) -> List[Product]:
