@@ -7,6 +7,7 @@ bp = Blueprint('cards', __name__)
 controller = MainController()
 
 @bp.route('/cards', methods=['POST'])
+
 def create_card() -> tuple[Any, int]:
     try:
         user_id = get_jwt_identity()
@@ -25,6 +26,7 @@ def create_card() -> tuple[Any, int]:
         return jsonify({'message': str(e)}), 500
 
 @bp.route('/cards', methods=['GET'])
+
 def get_user_cards() -> tuple[Any, int]:
     try:
         user_id = get_jwt_identity()
@@ -39,6 +41,7 @@ def get_user_cards() -> tuple[Any, int]:
         return jsonify({'message': str(e)}), 500
 
 @bp.route('/cards/<int:card_id>', methods=['GET'])
+
 def get_card_details(card_id: int) -> tuple[Any, int]:
     try:
         user_id = get_jwt_identity()

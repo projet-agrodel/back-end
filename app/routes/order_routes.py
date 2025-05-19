@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.controllers.base.main_controller import MainController
 from typing import Any
 
@@ -7,6 +7,7 @@ bp = Blueprint('orders', __name__)
 controller = MainController()
 
 @bp.route('/orders', methods=['POST'])
+
 def create_order() -> tuple[Any, int]:
     try:
         user_id = get_jwt_identity()
@@ -23,6 +24,7 @@ def create_order() -> tuple[Any, int]:
         return jsonify({'message': str(e)}), 500
 
 @bp.route('/orders', methods=['GET'])
+
 def get_user_orders() -> tuple[Any, int]:
     try:
         user_id = get_jwt_identity()
@@ -32,6 +34,7 @@ def get_user_orders() -> tuple[Any, int]:
         return jsonify({'message': str(e)}), 500
 
 @bp.route('/orders/<int:order_id>', methods=['GET'])
+
 def get_order_details(order_id: int) -> tuple[Any, int]:
     try:
         order = controller.orders.get_order_with_items(order_id)

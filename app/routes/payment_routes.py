@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.controllers.base.main_controller import MainController
 from app.utils.decorators import admin_required
 from typing import Any
@@ -8,6 +9,7 @@ bp = Blueprint('payments', __name__)
 controller = MainController()
 
 @bp.route('/payments', methods=['POST'])
+
 def create_payment() -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -30,6 +32,7 @@ def create_payment() -> tuple[Any, int]:
         return jsonify({'message': str(e)}), 500
 
 @bp.route('/payments/order/<int:order_id>', methods=['GET'])
+
 def get_order_payments(order_id: int) -> tuple[Any, int]:
     try:
         payments = controller.payments.get_order_payments(order_id)
@@ -38,6 +41,8 @@ def get_order_payments(order_id: int) -> tuple[Any, int]:
         return jsonify({'message': str(e)}), 500
 
 @bp.route('/payments/<int:payment_id>/status', methods=['PUT'])
+
+@admin_required
 def update_payment_status(payment_id: int) -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -59,6 +64,8 @@ def update_payment_status(payment_id: int) -> tuple[Any, int]:
         return jsonify({'message': str(e)}), 500
 
 @bp.route('/payments/pending', methods=['GET'])
+
+@admin_required
 def get_pending_payments() -> tuple[Any, int]:
     try:
         payments = controller.payments.get_pending_payments()

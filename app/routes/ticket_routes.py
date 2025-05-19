@@ -7,7 +7,7 @@ bp = Blueprint('tickets', __name__)
 controller = MainController()
 
 @bp.route('/tickets', methods=['POST'])
-@jwt_required()
+
 def create_ticket() -> tuple[Any, int]:
     try:
         user_id = get_jwt_identity()
@@ -18,7 +18,7 @@ def create_ticket() -> tuple[Any, int]:
         return jsonify({'error': str(e)}), 400
 
 @bp.route('/tickets', methods=['GET'])
-@jwt_required()
+
 def get_tickets() -> tuple[Any, int]:
     user_id = get_jwt_identity()
     query = request.args.get('query')
@@ -31,7 +31,7 @@ def get_tickets() -> tuple[Any, int]:
     return jsonify([ticket.to_dict() for ticket in tickets]), 200
 
 @bp.route('/tickets/<int:ticket_id>', methods=['GET'])
-@jwt_required()
+
 def get_ticket(ticket_id: int) -> tuple[Any, int]:
     ticket = controller.tickets.get_by_id(ticket_id)
     if not ticket:
@@ -39,7 +39,7 @@ def get_ticket(ticket_id: int) -> tuple[Any, int]:
     return jsonify(ticket.to_dict()), 200
 
 @bp.route('/tickets/<int:ticket_id>/status', methods=['PATCH'])
-@jwt_required()
+
 def update_ticket_status(ticket_id: int) -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -52,7 +52,7 @@ def update_ticket_status(ticket_id: int) -> tuple[Any, int]:
         return jsonify({'error': str(e)}), 400
 
 @bp.route('/tickets/<int:ticket_id>/messages', methods=['POST'])
-@jwt_required()
+
 def create_message(ticket_id: int) -> tuple[Any, int]:
     try:
         user_id = get_jwt_identity()
@@ -63,7 +63,7 @@ def create_message(ticket_id: int) -> tuple[Any, int]:
         return jsonify({'error': str(e)}), 400
 
 @bp.route('/tickets/<int:ticket_id>/messages', methods=['GET'])
-@jwt_required()
+
 def get_messages(ticket_id: int) -> tuple[Any, int]:
     messages = controller.ticket_messages.get_ticket_messages(ticket_id)
     return jsonify([message.to_dict() for message in messages]), 200

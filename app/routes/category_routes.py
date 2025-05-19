@@ -7,7 +7,7 @@ bp = Blueprint('categories', __name__)
 controller = MainController()
 
 @bp.route('/categories', methods=['POST'])
-@jwt_required()
+
 def create_category() -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -33,7 +33,7 @@ def get_category(category_id: int) -> tuple[Any, int]:
     return jsonify(category.to_dict()), 200
 
 @bp.route('/categories/<int:category_id>', methods=['PUT'])
-@jwt_required()
+
 def update_category(category_id: int) -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -45,7 +45,7 @@ def update_category(category_id: int) -> tuple[Any, int]:
         return jsonify({'error': str(e)}), 400
 
 @bp.route('/categories/<int:category_id>', methods=['DELETE'])
-@jwt_required()
+
 def delete_category(category_id: int) -> tuple[Any, int]:
     try:
         if controller.categories.delete(category_id):
