@@ -4,6 +4,7 @@ from ..base.base_controller import BaseController
 from ...extensions import db
 from sqlalchemy import or_, asc, desc
 from decimal import Decimal
+# from ...models.category import Category # Não é estritamente necessário para este filtro simples
 
 class ProductController(BaseController[Product]):
     def __init__(self) -> None:
@@ -85,7 +86,14 @@ class ProductController(BaseController[Product]):
             self._db.session.rollback()
             raise e
 
-    def get_all(self, query: str = None, min_price: float = None, max_price: float = None, sort: str = None) -> List[Product]:
+    def get_all(self,
+                query: str = None,
+                min_price: float = None,
+                max_price: float = None,
+                sort: str = None,
+                category_id: int = None, # Novo parâmetro
+                status: str = None       # Novo parâmetro
+                ) -> List[Product]:
         base_query = self.get_query()
         
         if query:
@@ -94,6 +102,12 @@ class ProductController(BaseController[Product]):
                 Product.name.ilike(search_term),
                 Product.description.ilike(search_term)
             ))
+        
+        if category_id is not None:
+            base_query = base_query.filter(Product.category_id == category_id)
+
+        if status is not None:
+            base_query = base_query.filter(Product.status == status)
             
         if min_price is not None:
             try:
@@ -114,6 +128,10 @@ class ProductController(BaseController[Product]):
                 base_query = base_query.order_by(asc(Product.price))
             elif sort == 'price_desc':
                 base_query = base_query.order_by(desc(Product.price))
+            elif sort == 'name_asc':
+                base_query = base_query.order_by(asc(Product.name))
+            elif sort == 'name_desc':
+                base_query = base_query.order_by(desc(Product.name))
 
         return base_query.all()
 
