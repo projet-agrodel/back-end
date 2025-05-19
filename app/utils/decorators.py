@@ -1,6 +1,12 @@
 from functools import wraps
+<<<<<<< HEAD
 from flask_jwt_extended import verify_jwt_in_request, get_jwt, get_jwt_identity
 from flask import jsonify, request
+=======
+from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+from flask import jsonify
+from ..models.user import User, UserType
+>>>>>>> dvd
 
 def admin_required(fn):
     @wraps(fn)
@@ -38,6 +44,7 @@ def admin_or_owner_required(resource_user_id_param="user_id"):
         @wraps(fn)
         def wrapper(*args, **kwargs):
             verify_jwt_in_request()
+<<<<<<< HEAD
             claims = get_jwt()
             current_user_id_from_token = get_jwt_identity()
             
@@ -61,3 +68,22 @@ def admin_or_owner_required(resource_user_id_param="user_id"):
 # O @user_required acima é uma camada adicional se precisarmos diferenciar tipos específicos
 # de usuários para certas rotas que não são exclusivamente de admin.
 # Para rotas que apenas requerem um usuário logado (qualquer tipo), @jwt_required é o ideal. 
+=======
+            current_user_id = get_jwt_identity()
+            
+            try:
+                user_id_as_int = int(current_user_id)
+            except ValueError:
+                return jsonify({'error': 'Identidade do usuário inválida no token.'}), 401
+
+            current_user = User.query.get(user_id_as_int)
+            
+            if not current_user:
+                return jsonify({'error': 'Usuário do token não encontrado.'}), 401
+
+            if current_user.type != UserType.admin:
+                return jsonify({'error': 'Acesso negado. Requer privilégios de administrador.'}), 403
+            return fn(*args, **kwargs)
+        return decorator
+    return wrapper 
+>>>>>>> dvd

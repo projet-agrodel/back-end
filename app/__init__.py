@@ -7,6 +7,7 @@ from .extensions import db, bcrypt, jwt, mail
 from flask_migrate import Migrate
 # Importar funções do DB Manager
 from .services.database_manager import criar_tabelas, inserir_categorias, inserir_produtos, inserir_usuarios
+from flask_jwt_extended import JWTManager
 
 def create_app(config_class=Config):
     app = Flask(__name__, instance_relative_config=False) # Garantir que instance folder não interfira
@@ -35,8 +36,9 @@ def create_app(config_class=Config):
         user_routes, product_routes, ticket_routes,
         category_routes, order_routes, payment_routes,
         cart_routes, card_routes, auth_routes,
-        public_product_routes
+        admin_routes, public_product_routes
     )
+
     app.register_blueprint(user_routes.bp)
     app.register_blueprint(product_routes.bp)
     app.register_blueprint(public_product_routes.bp)
@@ -47,6 +49,7 @@ def create_app(config_class=Config):
     app.register_blueprint(cart_routes.bp)
     app.register_blueprint(card_routes.bp)
     app.register_blueprint(auth_routes.bp)
+    app.register_blueprint(admin_routes.admin_bp)
 
     # Chamar as funções de inicialização do DB Manager na ordem correta
     with app.app_context():
