@@ -3,10 +3,11 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.controllers.base.main_controller import MainController
 from typing import Any
 
-bp = Blueprint('carts', __name__)
+bp = Blueprint('carts', __name__, url_prefix='/api')
 controller = MainController()
 
 @bp.route('/cart', methods=['GET'])
+@jwt_required()
 def get_cart() -> tuple[Any, int]:
     try:
         user_id = get_jwt_identity()
@@ -16,6 +17,7 @@ def get_cart() -> tuple[Any, int]:
         return jsonify({'message': str(e)}), 500
 
 @bp.route('/cart/add', methods=['POST'])
+@jwt_required()
 def add_to_cart() -> tuple[Any, int]:
     try:
         user_id = get_jwt_identity()
@@ -28,13 +30,14 @@ def add_to_cart() -> tuple[Any, int]:
             return jsonify({'message': 'ID do produto é obrigatório'}), 400
             
         cart_item = controller.carts.add_item(user_id, product_id, quantity)
-        return jsonify({'message': 'Item adicionado ao carrinho com sucesso'}), 201
+        return jsonify({'message': 'Item adicionado ao carrinho com sucesso', 'item': cart_item.to_dict()}), 201
     except ValueError as e:
         return jsonify({'message': str(e)}), 400
     except Exception as e:
         return jsonify({'message': str(e)}), 500
 
 @bp.route('/cart/remove/<int:product_id>', methods=['DELETE'])
+@jwt_required()
 def remove_from_cart(product_id: int) -> tuple[Any, int]:
     try:
         user_id = get_jwt_identity()

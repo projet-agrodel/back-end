@@ -34,10 +34,12 @@ def create_app(config_class=Config):
     from .routes import (
         user_routes, product_routes, ticket_routes,
         category_routes, order_routes, payment_routes,
-        cart_routes, card_routes, auth_routes
+        cart_routes, card_routes, auth_routes,
+        public_product_routes
     )
     app.register_blueprint(user_routes.bp)
     app.register_blueprint(product_routes.bp)
+    app.register_blueprint(public_product_routes.bp)
     app.register_blueprint(ticket_routes.bp)
     app.register_blueprint(category_routes.bp)
     app.register_blueprint(order_routes.bp)
