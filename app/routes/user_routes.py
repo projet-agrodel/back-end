@@ -1,11 +1,11 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.controllers.base.main_controller import MainController
-from app.utils.decorators import admin_required, admin_or_owner_required
+from app.utils.decorators import admin_required
 from typing import Any
 import re # Importar o módulo re para expressões regulares
 
-bp = Blueprint('users', __name__, url_prefix='/api')
+bp = Blueprint('users', __name__)
 controller = MainController()
 
 @bp.route('/users', methods=['POST'])
@@ -27,17 +27,11 @@ def create_user() -> tuple[Any, int]:
             return jsonify({'message': 'A senha deve conter pelo menos um número.'}), 400
 
         user = controller.users.create_user(data)
-        return jsonify({
-            'message': 'Usuário criado com sucesso', 
-            'user': {'id': user.id, 'name': user.name, 'email': user.email, 'type': user.type.value}
-        }), 201
-    except ValueError as e: # Capturar ValueError para emails duplicados, etc.
-        return jsonify({'message': str(e)}), 409 # 409 Conflict pode ser mais apropriado
+        return jsonify({'message': 'Usuário criado com sucesso', 'id': user.id }), 201
     except Exception as e:
         return jsonify({'message': str(e)}), 400
 
 @bp.route('/users', methods=['GET'])
-
 def get_users() -> tuple[Any, int]:
     query = request.args.get('query')
     user_type = request.args.get('type')
@@ -52,7 +46,6 @@ def get_users() -> tuple[Any, int]:
     return jsonify([user.to_dict() for user in users]), 200
 
 @bp.route('/users/<int:user_id>', methods=['GET'])
-@admin_or_owner_required(resource_user_id_param="user_id")
 def get_user(user_id: int) -> tuple[Any, int]:
     user = controller.users.get_by_id(user_id)
     if not user:
@@ -61,35 +54,19 @@ def get_user(user_id: int) -> tuple[Any, int]:
     return jsonify(user.to_dict()), 200
 
 @bp.route('/users/<int:user_id>', methods=['PUT'])
-@admin_or_owner_required(resource_user_id_param="user_id")
 def update_user(user_id: int) -> tuple[Any, int]:
     try:
         data = request.get_json()
-        current_user_id_from_token = get_jwt_identity()
-        claims = get_jwt()
-        current_user_type = claims.get("user_type")
-
-        if str(user_id) == current_user_id_from_token and current_user_type == "user" and 'type' in data and data['type'] == 'admin':
-            return jsonify({'message': 'Usuários não podem se promover a administradores.'}), 403
-        
-        if 'password' in data:
-            return jsonify({'message': 'Para alterar a senha, use a rota /user/change-password.'}), 400
-
         user = controller.users.update_user(user_id, data)
         if not user:
             return jsonify({'error': 'Usuário não encontrado'}), 404
-        return jsonify({'message': 'Usuário atualizado com sucesso', 'user': user.to_dict()}), 200
+        return jsonify({'message': 'Usuário atualizado com sucesso'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
 @bp.route('/users/<int:user_id>', methods=['DELETE'])
-
 def delete_user(user_id: int) -> tuple[Any, int]:
     try:
-        current_user_id_from_token = get_jwt_identity()
-        if str(user_id) == current_user_id_from_token:
-            return jsonify({'message': 'Administradores não podem se auto-deletar por esta rota.'}), 403
-
         if controller.users.delete(user_id):
             return jsonify({'message': 'Usuário deletado com sucesso'}), 200
         return jsonify({'error': 'Usuário não encontrado'}), 404
