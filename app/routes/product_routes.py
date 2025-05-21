@@ -16,61 +16,30 @@ def create_product() -> tuple[Any, int]:
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-@bp.route('/products', methods=['GET'])
-def get_products() -> tuple[Any, int]:
-    query = request.args.get('q')
-    min_price_str = request.args.get('minPrice')
-    max_price_str = request.args.get('maxPrice')
-    sort = request.args.get('sort')
-
-    min_price = None
-    if min_price_str:
-        try:
-            min_price = float(min_price_str)
-        except ValueError:
-            return jsonify({'error': "Parâmetro 'minPrice' inválido."}), 400
-            
-    max_price = None
-    if max_price_str:
-        try:
-            max_price = float(max_price_str)
-        except ValueError:
-            return jsonify({'error': "Parâmetro 'maxPrice' inválido."}), 400
-
-    try:
-        products = controller.products.get_all(
-            query=query, 
-            min_price=min_price, 
-            max_price=max_price, 
-            sort=sort
-        )
-        return jsonify([product.to_dict() for product in products]), 200
-    except Exception as e:
-        print(f"Erro ao buscar produtos para usuário: {e}")
-        return jsonify({'error': "Erro interno ao buscar produtos."}), 500
-
-@bp.route('/admin/products', methods=['GET'])
+@bp.route('/products/list', methods=['GET'])
 @admin_required()
 def admin_get_products() -> tuple[Any, int]:
-    query = request.args.get('q')
-    min_price_str = request.args.get('minPrice')
-    max_price_str = request.args.get('maxPrice')
+    query = request.args.get('query')
+    min_price_str = request.args.get('min_price')
+    max_price_str = request.args.get('max_price')
     sort = request.args.get('sort')
-    status_filter = request.args.get('status')
+    status_filter = request.args.get('status_filter')
+    
+    print(f"Recebendo solicitação de produtos para admin. Status filter: {status_filter}")
 
     min_price = None
     if min_price_str:
         try:
             min_price = float(min_price_str)
         except ValueError:
-            return jsonify({'error': "Parâmetro 'minPrice' inválido."}), 400
+            return jsonify({'error': "Parâmetro 'min_price' inválido."}), 400
             
     max_price = None
     if max_price_str:
         try:
             max_price = float(max_price_str)
         except ValueError:
-            return jsonify({'error': "Parâmetro 'maxPrice' inválido."}), 400
+            return jsonify({'error': "Parâmetro 'max_price' inválido."}), 400
 
     try:
         products = controller.products.get_all(
@@ -81,6 +50,7 @@ def admin_get_products() -> tuple[Any, int]:
             status=status_filter,
             for_admin=True
         )
+        print(f"Produtos encontrados: {len(products)}, incluindo status: {[p.status for p in products[:5]]}...")
         return jsonify([product.to_dict() for product in products]), 200
     except Exception as e:
         print(f"Erro ao buscar produtos para admin: {e}")
