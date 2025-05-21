@@ -86,7 +86,7 @@ class ProductController(BaseController[Product]):
             raise e
 
 
-    def get_all(self, query: str = None, min_price: float = None, max_price: float = None, sort: str = None, status: str = None, for_admin: bool = False) -> List[Product]:
+    def get_all(self, query: str = None, category_id: int = None, min_price: float = None, max_price: float = None, sort: str = None, status: str = None, for_admin: bool = False) -> List[Product]:
         base_query = self.get_query()
         
         if query:
@@ -96,14 +96,15 @@ class ProductController(BaseController[Product]):
                 Product.description.ilike(search_term)
             ))
 
+        if category_id is not None:
+            base_query = base_query.filter(Product.category_id == category_id)
+
         # Filtro de status revisado
         if not for_admin:
-            # Não-admin sempre veem apenas produtos ativos
             base_query = base_query.filter(Product.status == 'Ativo')
         elif status:
             # Admin com filtro específico
             base_query = base_query.filter(Product.status == status)
-        # Se for_admin e nenhum status específico, não aplica filtro (retorna todos)
 
         if min_price is not None:
             try:

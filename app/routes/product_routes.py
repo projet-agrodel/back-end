@@ -16,7 +16,7 @@ def create_product() -> tuple[Any, int]:
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-@bp.route('/products/list', methods=['GET'])
+@bp.route('/products', methods=['GET'])
 @admin_required()
 def admin_get_products() -> tuple[Any, int]:
     query = request.args.get('query')

@@ -38,7 +38,7 @@ def get_public_products() -> tuple[Any, int]:
             min_price=min_price, 
             max_price=max_price, 
             sort=sort,
-            status='Ativo' # Garantir que apenas produtos ativos sejam listados publicamente
+            status='Ativo'
         )
         return jsonify([product.to_dict() for product in products]), 200
     except Exception as e:
