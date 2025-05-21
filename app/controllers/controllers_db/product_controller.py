@@ -166,6 +166,31 @@ class ProductController(BaseController[Product]):
     def get_low_stock_products(self, threshold: int = 10) -> List[Product]:
         return self.get_query().filter(Product.stock <= threshold).all()
 
-    def check_stock_availability(self, product_id: int, quantity: int) -> bool:
+    def check_stock_availability(self, product_id: int, quantity: int = 1) -> dict:
+
         product = self.get_by_id(product_id)
-        return product is not None and product.stock >= quantity 
+        
+        if not product:
+            return {
+                'available': False,
+                'stock': 0,
+                'requested': quantity,
+                'error': 'Produto não encontrado'
+            }
+            
+        if product.status != 'Ativo':
+            return {
+                'available': False,
+                'stock': product.stock,
+                'requested': quantity,
+                'error': 'Produto inativo'
+            }
+            
+        is_available = product.stock >= quantity
+        
+        return {
+            'available': is_available,
+            'stock': product.stock,
+            'requested': quantity,
+            'error': None if is_available else 'Estoque insuficiente'
+        } 

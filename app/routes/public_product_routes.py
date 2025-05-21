@@ -51,3 +51,29 @@ def get_public_product_details(product_id: int) -> tuple[Any, int]:
     if not product or product.status != 'Ativo': # Apenas produtos ativos
         return jsonify({'error': 'Produto não encontrado ou indisponível'}), 404
     return jsonify(product.to_dict()), 200 
+
+@bp.route('/products/<int:product_id>/availability', methods=['GET'])
+def check_product_availability(product_id: int) -> tuple[Any, int]:
+    """
+    Verifica a disponibilidade de estoque de um produto.
+    Retorna o estoque atual e status de disponibilidade.
+    """
+    try:
+        # Obter a quantidade solicitada do query params (opcional)
+        quantity = request.args.get('quantity', default=1, type=int)
+        
+        # Usar o método melhorado do controller
+        result = controller.products.check_stock_availability(product_id, quantity)
+        
+        if 'error' in result and result['error'] == 'Produto não encontrado':
+            return jsonify(result), 404
+        
+        return jsonify(result), 200
+    except Exception as e:
+        print(f"Erro ao verificar disponibilidade do produto {product_id}: {e}")
+        return jsonify({
+            'error': "Erro interno ao verificar disponibilidade do produto.",
+            'available': False,
+            'stock': 0,
+            'requested': quantity if 'quantity' in locals() else 1
+        }), 500 

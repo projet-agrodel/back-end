@@ -67,3 +67,45 @@ class CartController(BaseController[Cart]):
         if not cart:
             return []
         return cart.items 
+
+    def sync_cart(self, user_id: int, cart_items: List[Dict]) -> List[CartItem]:
+        try:
+            # Obter ou criar o carrinho do usuário
+            cart = self.get_or_create_cart(user_id)
+            
+            # Se quiser mesclar os carrinhos, remova esta linha
+            CartItem.query.filter_by(carrinho_id=cart.id).delete()
+            
+            # Adicionar os novos itens do carrinho local
+            synced_items = []
+            for item in cart_items:
+                produto_id = item.get('produto_id')
+                quantity = item.get('quantity', 1)
+
+                product = Product.query.get(produto_id)
+                if not product:
+                    continue  # Ignorar produtos que não existem mais
+
+                if product.status != 'Ativo':
+                    continue
+                    
+                adjusted_quantity = min(quantity, product.stock)
+                if adjusted_quantity <= 0:
+                    continue  # Pular se não houver estoque
+                
+                # Criar o item no carrinho
+                cart_item = CartItem(
+                    carrinho_id=cart.id,
+                    produto_id=produto_id,
+                    quantity=adjusted_quantity
+                )
+                self._db.session.add(cart_item)
+                synced_items.append(cart_item)
+            
+            self._db.session.commit()
+            
+            return self.get_cart_items(user_id)
+            
+        except Exception as e:
+            self._db.session.rollback()
+            raise e 
