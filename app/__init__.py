@@ -5,7 +5,6 @@ from .config import Config
 # Importar instâncias das extensões
 from .extensions import db, bcrypt, jwt, mail
 from flask_migrate import Migrate
-# Importar funções do DB Manager
 from .services.database_manager import criar_tabelas, inserir_categorias, inserir_produtos, inserir_usuarios
 from flask_jwt_extended import JWTManager
 

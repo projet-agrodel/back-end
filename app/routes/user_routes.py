@@ -3,9 +3,9 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.controllers.base.main_controller import MainController
 from app.utils.decorators import admin_required
 from typing import Any
-import re # Importar o módulo re para expressões regulares
+import re
 
-bp = Blueprint('users', __name__)
+bp = Blueprint('users', __name__, url_prefix='/api')
 controller = MainController()
 
 @bp.route('/users', methods=['POST'])
