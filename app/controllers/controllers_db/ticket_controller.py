@@ -13,7 +13,7 @@ class TicketController(BaseController[Ticket]):
         try:
             ticket = self.create({
                 'user_id': user_id,
-                'title': data['title'],
+                'title': data.get('title'),
                 'description': data.get('description'),
                 'priority': data.get('priority', 'Média')
             })

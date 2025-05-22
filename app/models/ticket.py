@@ -6,7 +6,7 @@ from sqlalchemy import Enum
 class Ticket(db.Model):
     __tablename__ = 'ticket'
     
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
     title = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text)
