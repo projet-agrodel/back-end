@@ -31,7 +31,7 @@ class ProductController(BaseController[Product]):
                 if not isinstance(data['status'], str) or data['status'] not in ['Ativo', 'Inativo']:
                      data.pop('status', None)
 
-            new_product = self.create(data) # self.create é do BaseController
+            new_product = self.create(data) # self.create é do BaseController e já faz commit
             return new_product
         except Exception as e:
             self._db.session.rollback()
@@ -50,7 +50,7 @@ class ProductController(BaseController[Product]):
                     # Considerar levantar um erro se a conversão falhar
                     pass # ou raise ValueError(f"Valor inválido para preço: {data['price']}")
             elif 'price' in data and data['price'] is None:
-                product.price = None # Permitir definir o preço como nulo se o modelo permitir
+                product.price = None 
 
             if 'originalPrice' in data and data['originalPrice'] is not None:
                 try:
@@ -74,26 +74,19 @@ class ProductController(BaseController[Product]):
             elif 'status' in data and data['status'] is None:
                  pass
 
-            # Para outros campos que não precisam de tratamento especial:
             allowed_fields = ['name', 'description', 'stock', 'category_id', 'imageUrl'] 
             for field in allowed_fields:
                 if field in data:
                     setattr(product, field, data[field])
             
-            self.save(product) # self.save() é do BaseController
+            self._db.session.commit()
             return product
         except Exception as e:
             self._db.session.rollback()
             raise e
 
-    def get_all(self,
-                query: str = None,
-                min_price: float = None,
-                max_price: float = None,
-                sort: str = None,
-                category_id: int = None, # Novo parâmetro
-                status: str = None       # Novo parâmetro
-                ) -> List[Product]:
+
+    def get_all(self, query: str = None, category_id: int = None, min_price: float = None, max_price: float = None, sort: str = None, status: str = None, for_admin: bool = False) -> List[Product]:
         base_query = self.get_query()
         
         if query:
@@ -102,36 +95,36 @@ class ProductController(BaseController[Product]):
                 Product.name.ilike(search_term),
                 Product.description.ilike(search_term)
             ))
-        
+
         if category_id is not None:
             base_query = base_query.filter(Product.category_id == category_id)
 
-        if status is not None:
+        # Filtro de status revisado
+        if not for_admin:
+            base_query = base_query.filter(Product.status == 'Ativo')
+        elif status:
+            # Admin com filtro específico
             base_query = base_query.filter(Product.status == status)
-            
+
         if min_price is not None:
             try:
                 min_price_decimal = Decimal(str(min_price))
                 base_query = base_query.filter(Product.price >= min_price_decimal)
             except (ValueError, TypeError):
-                pass
+                pass # Ignorar filtro se o valor for inválido
 
         if max_price is not None:
             try:
                 max_price_decimal = Decimal(str(max_price))
                 base_query = base_query.filter(Product.price <= max_price_decimal)
             except (ValueError, TypeError):
-                pass
-                
+                pass # Ignorar filtro se o valor for inválido
+        
         if sort:
             if sort == 'price_asc':
                 base_query = base_query.order_by(asc(Product.price))
             elif sort == 'price_desc':
                 base_query = base_query.order_by(desc(Product.price))
-            elif sort == 'name_asc':
-                base_query = base_query.order_by(asc(Product.name))
-            elif sort == 'name_desc':
-                base_query = base_query.order_by(desc(Product.name))
 
         return base_query.all()
 
@@ -144,7 +137,7 @@ class ProductController(BaseController[Product]):
             raise ValueError("Estoque não pode ser negativo")
             
         product.stock += quantity
-        self.save(product)
+        self._db.session.commit()
         return product
 
     def search_products(self, query: str) -> List[Product]:
@@ -164,6 +157,31 @@ class ProductController(BaseController[Product]):
     def get_low_stock_products(self, threshold: int = 10) -> List[Product]:
         return self.get_query().filter(Product.stock <= threshold).all()
 
-    def check_stock_availability(self, product_id: int, quantity: int) -> bool:
+    def check_stock_availability(self, product_id: int, quantity: int = 1) -> dict:
+
         product = self.get_by_id(product_id)
-        return product is not None and product.stock >= quantity 
+        
+        if not product:
+            return {
+                'available': False,
+                'stock': 0,
+                'requested': quantity,
+                'error': 'Produto não encontrado'
+            }
+            
+        if product.status != 'Ativo':
+            return {
+                'available': False,
+                'stock': product.stock,
+                'requested': quantity,
+                'error': 'Produto inativo'
+            }
+            
+        is_available = product.stock >= quantity
+        
+        return {
+            'available': is_available,
+            'stock': product.stock,
+            'requested': quantity,
+            'error': None if is_available else 'Estoque insuficiente'
+        } 

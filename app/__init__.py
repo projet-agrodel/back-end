@@ -5,8 +5,8 @@ from .config import Config
 # Importar instâncias das extensões
 from .extensions import db, bcrypt, jwt, mail
 from flask_migrate import Migrate
-# Importar funções do DB Manager
 from .services.database_manager import criar_tabelas, inserir_categorias, inserir_produtos, inserir_usuarios
+from flask_jwt_extended import JWTManager
 
 def create_app(config_class=Config):
     app = Flask(__name__, instance_relative_config=False) # Garantir que instance folder não interfira
@@ -21,22 +21,26 @@ def create_app(config_class=Config):
     app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
     app.config.pop('DATABASE_URL', None)
 
-    CORS(app)
+    CORS(app, resources={r"/*": {
+        "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }})
 
-    # Inicializa as extensões (usando as instâncias importadas)
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
     Migrate(app, db)
     mail.init_app(app)
 
-    # Importa e registra as blueprints ANTES de create_all
     from .routes import (
         user_routes, product_routes, ticket_routes,
         category_routes, order_routes, payment_routes,
         cart_routes, card_routes, auth_routes,
-        public_product_routes
+        admin_routes, public_product_routes,
+        admin_analytics_routes
     )
+
     app.register_blueprint(user_routes.bp)
     app.register_blueprint(product_routes.bp)
     app.register_blueprint(public_product_routes.bp)
@@ -47,6 +51,8 @@ def create_app(config_class=Config):
     app.register_blueprint(cart_routes.bp)
     app.register_blueprint(card_routes.bp)
     app.register_blueprint(auth_routes.bp)
+    app.register_blueprint(admin_routes.admin_bp)
+    app.register_blueprint(admin_analytics_routes.admin_analytics_bp)
 
     # Chamar as funções de inicialização do DB Manager na ordem correta
     with app.app_context():

@@ -27,8 +27,8 @@ def login():
             # Senha correta, gerar token JWT
             # A identidade do token deve ser uma string.
             # O tempo de expiração pode ser configurado globalmente ou aqui
-            additional_claims = {"user_type": user.type.value} # Acessa o valor do Enum
-            access_token = create_access_token(identity=str(user.id), additional_claims=additional_claims) # Convertendo user.id para string
+            access_token = create_access_token(identity=str(user.id))
+
             user_data_for_response = {
                 "id": user.id,
                 "name": user.name,

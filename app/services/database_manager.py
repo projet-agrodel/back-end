@@ -1,5 +1,5 @@
 # Importar db do novo local
-from ..extensions import db
+from ..extensions import db, bcrypt
 from ..models.user import User
 from ..models.product import Product
 from ..models.category import Category
@@ -23,9 +23,9 @@ def inserir_usuarios(app):
         if User.query.filter_by(email="alice@email.com").first() is None:
             print("Inserindo usuários fixos...")
             usuarios = [
-                User(name="Alice", email="alice@email.com", password="senha123", phone="11999999999", type='admin'),
-                User(name="Bob", email="bob@email.com", password="senha456", phone="11888888888", type='admin'),
-                User(name="Charlie", email="charlie@email.com", password="senha789", phone="11777777777", type='admin'),
+                User(name="Alice", email="alice@email.com", password=bcrypt.generate_password_hash("senha123").decode('utf-8'), phone="11999999999", type='admin'),
+                User(name="Bob", email="bob@email.com", password=bcrypt.generate_password_hash("senha456").decode('utf-8'), phone="11888888888", type='admin'),
+                User(name="Charlie", email="charlie@email.com", password=bcrypt.generate_password_hash("senha789").decode('utf-8'), phone="11777777777", type='admin'),
             ]
             try:
                 db.session.add_all(usuarios)
