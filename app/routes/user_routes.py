@@ -29,7 +29,7 @@ def create_user() -> tuple[Any, int]:
         user = controller.users.create_user(data)
         return jsonify({
             'message': 'Usuário criado com sucesso', 
-            'user': {'id': user.id, 'name': user.name, 'email': user.email, 'type': user.type.value}
+            'user': {'id': user.id, 'name': user.name, 'email': user.email, 'type': user.type.value }
         }), 201
     except ValueError as e: # Capturar ValueError para emails duplicados, etc.
         return jsonify({'message': str(e)}), 409 # 409 Conflict pode ser mais apropriado
