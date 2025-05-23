@@ -117,3 +117,28 @@ def create_message(ticket_id: int) -> tuple[Any, int]:
 def get_messages(ticket_id: int) -> tuple[Any, int]:
     messages = controller.ticket_messages.get_ticket_messages(ticket_id)
     return jsonify([message.to_dict() for message in messages]), 200
+
+@bp.route('/tickets/<int:ticket_id>/update-status', methods=['PATCH'])
+def update_ticket_status_and_priority(ticket_id: int) -> tuple[Any, int]:
+    try:
+        data = request.get_json()
+        status = data.get('status')
+        priority = data.get('priority')
+
+        if not status and not priority:
+            return jsonify({'error': 'É necessário fornecer status e/ou prioridade'}), 400
+
+        ticket = controller.tickets.update_ticket_status_and_priority(
+            ticket_id=ticket_id,
+            status=status,
+            priority=priority
+        )
+
+        if not ticket:
+            return jsonify({'error': 'Ticket não encontrado'}), 404
+
+        return jsonify(ticket.to_dict()), 200
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400

@@ -16,7 +16,7 @@ class Ticket(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relacionamentos
-    user = db.relationship('User', backref='tickets')
+    user = db.relationship('User', backref='tickets', foreign_keys=[user_id])
     messages = db.relationship('TicketMessage', backref='ticket', cascade='all, delete-orphan')
     
     def to_dict(self) -> dict:
