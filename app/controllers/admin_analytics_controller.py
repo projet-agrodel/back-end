@@ -135,3 +135,61 @@ class AdminAnalyticsController:
             "average_orders_per_day": round(current_orders / 30, 1),
             "last_updated": datetime.now().isoformat()
         }), 200
+
+    @staticmethod
+    def get_new_customers_data():
+        """
+        Retorna dados mockados para a análise de novos clientes.
+        TODO: Substituir por queries reais do banco quando em produção.
+        """
+        # Dados mockados para o gráfico de novos clientes por mês
+        monthly_new_customers_data = [
+            { "mes": "Jan", "novosClientes": random.randint(50, 80) },
+            { "mes": "Fev", "novosClientes": random.randint(40, 70) },
+            { "mes": "Mar", "novosClientes": random.randint(70, 100) },
+            { "mes": "Abr", "novosClientes": random.randint(75, 110) },
+            { "mes": "Mai", "novosClientes": random.randint(50, 80) },
+            { "mes": "Jun", "novosClientes": random.randint(65, 95) },
+            { "mes": "Jul", "novosClientes": random.randint(80, 120) }, # Mês atual (simulado)
+        ]
+
+        # Dados mockados para clientes recentes
+        recent_customers_data = []
+        first_names = ["Mariana", "Rafael", "Juliana", "Lucas", "Beatriz", "Carlos", "Fernanda", "Ricardo", "Patricia", "Gustavo"]
+        last_names = ["Santos", "Oliveira", "Pereira", "Martins", "Almeida", "Costa", "Souza", "Lima", "Carvalho", "Rodrigues"]
+        channels = ["Orgânico", "Referência", "Social", "Campanha Email", "Direto"]
+        
+        for i in range(5):
+            days_ago = random.randint(1, 10)
+            recent_customers_data.append({
+                "id": f"USR{random.randint(100, 999):03d}",
+                "nome": f"{random.choice(first_names)} {random.choice(last_names)}",
+                "dataRegistro": (datetime.now() - timedelta(days=days_ago)).strftime('%Y-%m-%d'),
+                "canal": random.choice(channels)
+            })
+
+        # Métricas agregadas
+        total_novos_clientes_periodo = sum(item["novosClientes"] for item in monthly_new_customers_data)
+        
+        if len(monthly_new_customers_data) >= 2:
+            novos_clientes_mes_atual = monthly_new_customers_data[-1]["novosClientes"]
+            novos_clientes_mes_anterior = monthly_new_customers_data[-2]["novosClientes"]
+            if novos_clientes_mes_anterior > 0:
+                crescimento_percentual = round(((novos_clientes_mes_atual - novos_clientes_mes_anterior) / novos_clientes_mes_anterior) * 100, 1)
+            else:
+                crescimento_percentual = 0
+        else:
+            crescimento_percentual = 0
+            
+        cpa_estimado = round(random.uniform(10, 25), 2) # Custo por Aquisição Estimado (simulado)
+
+        return jsonify({
+            "monthly_new_customers_chart": monthly_new_customers_data,
+            "recent_customers": recent_customers_data,
+            "summary_metrics": {
+                "total_new_customers_period": total_novos_clientes_periodo,
+                "growth_percentage_vs_previous_month": crescimento_percentual,
+                "estimated_cpa_brl": cpa_estimado
+            },
+            "last_updated": datetime.now().isoformat()
+        }), 200

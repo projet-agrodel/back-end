@@ -26,3 +26,11 @@ def total_orders():
     Aceita parâmetros: start_date, end_date (formato: YYYY-MM-DD)
     """
     return AdminAnalyticsController.get_total_orders_data()
+
+@bp.route('/new-customers', methods=['GET'])
+@admin_required()
+def new_customers_data():
+    """
+    Endpoint para dados de análise de novos clientes.
+    """
+    return AdminAnalyticsController.get_new_customers_data()
