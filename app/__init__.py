@@ -1,12 +1,12 @@
 import os # Importar os
 from flask import Flask
-from flask_cors import CORS
+from flask_cors import CORS # Manter a importação
 from .config import Config
 # Importar instâncias das extensões
 from .extensions import db, bcrypt, jwt, mail
 from flask_migrate import Migrate
 from .services.database_manager import criar_tabelas, inserir_categorias, inserir_produtos, inserir_usuarios
-from flask_jwt_extended import JWTManager
+# from flask_jwt_extended import JWTManager # JWTManager já está em extensions.jwt
 
 def create_app(config_class=Config):
     app = Flask(__name__, instance_relative_config=False) # Garantir que instance folder não interfira
@@ -21,12 +21,7 @@ def create_app(config_class=Config):
     app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
     app.config.pop('DATABASE_URL', None)
 
-    CORS(app, resources={r"/*": {
-        "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-        "allow_headers": ["Content-Type", "Authorization"]
-    }})
-
+    # Inicializar extensões ANTES de registrar blueprints
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
@@ -54,7 +49,15 @@ def create_app(config_class=Config):
     app.register_blueprint(admin_routes.admin_bp)
     app.register_blueprint(admin_analytics_routes.bp)
 
-    # Chamar as funções de inicialização do DB Manager na ordem correta
+    # Configurar CORS DEPOIS de registrar todos os blueprints
+    # Para diagnóstico, começamos com origins="*", mas o ideal é restringir.
+    CORS(app, resources={r"/api/*": {"origins": "*"}, r"/admin/*": {"origins": "*"}}, supports_credentials=True)
+    # Ou, para ser mais específico com sua necessidade original:
+    # CORS(app, resources={
+    #    r"/api/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000"]},
+    #    r"/admin/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000"]}
+    # }, supports_credentials=True)
+
     with app.app_context():
         criar_tabelas(app)
         inserir_categorias(app)

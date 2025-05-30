@@ -9,7 +9,7 @@ mock_ticket_medio_evolution_data = [
   { "data": "13/Jul", "valor": 139.90 }, { "data": "14/Jul", "valor": 145.60 },
   { "data": "15/Jul", "valor": 150.10 }, { "data": "16/Jul", "valor": 148.75 },
   { "data": "17/Jul", "valor": 155.20 }, { "data": "18/Jul", "valor": 152.40 },
-  { "data": "19/Jul", "valor": 160.00 }, { "data": "20/Jul", "valor": 158.50 },
+  { "data": "19/Jul", "valor": 160.00 }, { "data": "20/Jul", "valor": 160.50 },
 ]
 
 mock_products_impact_ticket_data = [
@@ -28,10 +28,10 @@ mock_ticket_medio_summary_data = {
 
 # Dados fictícios para Taxa de Conversão (da branch HEAD)
 mock_conversion_funnel_data = [
-  { "stage": "Visitantes (Backend)", "value": 13500, "color": "#3b82f6" },
-  { "stage": "Visualizaram Produto (Backend)", "value": 8200, "color": "#22d3ee" },
-  { "stage": "Adicionaram Carrinho (Backend)", "value": 2800, "color": "#a3e635" },
-  { "stage": "Concluíram Compra (Backend)", "value": 1150, "color": "#22c55e" },
+  { "stage": "Visitantes", "value": 13500, "color": "#3b82f6" },
+  { "stage": "Visualizaram Produto", "value": 8200, "color": "#22d3ee" },
+  { "stage": "Adicionaram Carrinho", "value": 2800, "color": "#a3e635" },
+  { "stage": "Concluíram Compra", "value": 1150, "color": "#22c55e" },
 ]
 
 mock_conversion_optimizations_data = [
@@ -46,6 +46,28 @@ mock_conversion_summary_data = {
     "subtitle": "Conversão (Backend Teste)",
     "trend": "--5.0% TEST",
     "trendDirection": "down"
+}
+
+mock_visitantes_unicos_evolution_data = [
+  { "dia": "01/07", "visitantes": 350 }, { "dia": "02/07", "visitantes": 410 },
+  { "dia": "03/07", "visitantes": 380 }, { "dia": "04/07", "visitantes": 520 },
+  { "dia": "05/07", "visitantes": 480 }, { "dia": "06/07", "visitantes": 610 },
+  { "dia": "07/07", "visitantes": 550 }, { "dia": "08/07", "visitantes": 700 },
+  { "dia": "09/07", "visitantes": 650 }, { "dia": "10/07", "visitantes": 720 },
+]
+
+mock_fontes_trafego_data = [
+  { "nome": "Busca Orgânica", "visitantes": 5800, "percentual": 45, "iconName": "Search" },
+  { "nome": "Tráfego Direto", "visitantes": 3200, "percentual": 25, "iconName": "Globe" },
+  { "nome": "Redes Sociais", "visitantes": 2500, "percentual": 19, "iconName": "Users" },
+  { "nome": "Referências", "visitantes": 1500, "percentual": 11, "iconName": "Link2" },
+]
+
+mock_visitantes_unicos_summary_cards_data = {
+    "totalVisitantes": sum(item['visitantes'] for item in mock_visitantes_unicos_evolution_data),
+    "visitantesRecorrentesPercentual": 35, 
+    "novasSessoesPercentual": 65, 
+    "taxaRejeicaoPercentual": 42 
 }
 
 class AdminAnalyticsController:
@@ -157,6 +179,15 @@ class AdminAnalyticsController:
     @staticmethod
     def get_conversion_summary_data():
         return jsonify(mock_conversion_summary_data), 200
+
+    # --- Métodos para Visitantes Únicos (detalhes) ---
+    @staticmethod
+    def get_visitantes_unicos_details_data():
+        return jsonify({
+            "evolutionData": mock_visitantes_unicos_evolution_data,
+            "trafficSourcesData": mock_fontes_trafego_data,
+            "summaryCardsData": mock_visitantes_unicos_summary_cards_data
+        }), 200
 
     # --- Métodos da branch dvdweb2 ---
     @staticmethod
