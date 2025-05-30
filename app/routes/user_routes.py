@@ -102,14 +102,11 @@ def change_password() -> tuple[Any, int]:
         if not re.search(r"[0-9]", new_password):
             return jsonify({'message': 'A nova senha deve conter pelo menos um número.'}), 400
 
-        # Lógica para verificar a senha atual e atualizar para a nova senha
-        # Isso será movido para o controller
         success = controller.users.change_password(user_id, current_password, new_password)
         
         if success:
             return jsonify({'message': 'Senha alterada com sucesso.'}), 200
         else:
-            # A mensagem de erro específica virá do controller
             return jsonify({'message': 'Não foi possível alterar a senha. Verifique sua senha atual.'}), 400
             
     except Exception as e:

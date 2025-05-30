@@ -1,8 +1,9 @@
-from flask import jsonify
+from flask import jsonify, request
 import random
 from datetime import datetime, timedelta
+from decimal import Decimal
 
-# Dados fictícios para Ticket Médio e Taxa de Conversão (movidos para cá)
+# Dados fictícios para Ticket Médio (da branch HEAD)
 mock_ticket_medio_evolution_data = [
   { "data": "11/Jul", "valor": 138.50 }, { "data": "12/Jul", "valor": 142.30 },
   { "data": "13/Jul", "valor": 139.90 }, { "data": "14/Jul", "valor": 145.60 },
@@ -19,12 +20,13 @@ mock_products_impact_ticket_data = [
 ]
 
 mock_ticket_medio_summary_data = {
-    "value": "R$ 999,99", # Usando os valores de teste mais recentes
+    "value": "R$ 999,99", 
     "subtitle": "Ticket (Backend Novo Teste)",
     "trend": "++10.0% TEST",
     "trendDirection": "up"
 }
 
+# Dados fictícios para Taxa de Conversão (da branch HEAD)
 mock_conversion_funnel_data = [
   { "stage": "Visitantes (Backend)", "value": 13500, "color": "#3b82f6" },
   { "stage": "Visualizaram Produto (Backend)", "value": 8200, "color": "#22d3ee" },
@@ -40,12 +42,11 @@ mock_conversion_optimizations_data = [
 ]
 
 mock_conversion_summary_data = {
-    "value": "25.0% TEST", # Usando os valores de teste mais recentes
+    "value": "25.0% TEST",
     "subtitle": "Conversão (Backend Teste)",
     "trend": "--5.0% TEST",
     "trendDirection": "down"
 }
-
 
 class AdminAnalyticsController:
     @staticmethod
@@ -66,8 +67,6 @@ class AdminAnalyticsController:
                 "transactionCount": transaction_count
             })
             
-        # Simular algumas categorias com vendas maiores ou menores para dar variedade
-        # Exemplo: Fertilizantes e Defensivos com mais vendas
         for item in mock_data:
             if item["categoryName"] == "Fertilizantes":
                 item["totalSales"] = round(random.uniform(20000, 50000), 2)
@@ -76,10 +75,9 @@ class AdminAnalyticsController:
                 item["totalSales"] = round(random.uniform(18000, 45000), 2)
                 item["transactionCount"] = random.randint(90, 220)
             elif item["categoryName"] == "Rações Animal":
-                 item["totalSales"] = round(random.uniform(10000, 35000), 2)
-                 item["transactionCount"] = random.randint(80, 200)
+                item["totalSales"] = round(random.uniform(10000, 35000), 2)
+                item["transactionCount"] = random.randint(80, 200)
 
-        
         return jsonify(mock_data), 200
 
     @staticmethod
@@ -95,10 +93,9 @@ class AdminAnalyticsController:
             {'type': 'produto', 'description_template': 'Produto "{}" atualizado', 'details_template': None},
         ]
 
-        for i in range(1, 21): # Gerar 20 atividades fictícias
+        for i in range(1, 21): 
             activity_type = random.choice(activity_types)
             
-            # Gerar timestamp aleatório nas últimas 24 horas
             minutes_ago = random.randint(1, 24 * 60)
             timestamp = now - timedelta(minutes=minutes_ago)
 
@@ -129,16 +126,14 @@ class AdminAnalyticsController:
                 "id": f"act{i:03d}",
                 "tipo": activity_type['type'],
                 "descricao": description,
-                "timestamp": timestamp.isoformat(), # Formato ISO para fácil parse no frontend
+                "timestamp": timestamp.isoformat(),
                 "detalhes": details
             })
         
-        # Ordenar as atividades pela mais recente
         activities.sort(key=lambda x: x['timestamp'], reverse=True)
-
         return jsonify(activities), 200
 
-    # --- Métodos para Ticket Médio ---
+    # --- Métodos para Ticket Médio (da branch HEAD) ---
     @staticmethod
     def get_ticket_medio_evolution_data():
         return jsonify(mock_ticket_medio_evolution_data), 200
@@ -151,9 +146,9 @@ class AdminAnalyticsController:
     def get_ticket_medio_summary_data():
         return jsonify(mock_ticket_medio_summary_data), 200
 
-    # --- Métodos para Taxa de Conversão ---
+    # --- Métodos para Taxa de Conversão (da branch HEAD) ---
     @staticmethod
-    def get_conversion_funnel_data(): # Este método servirá o funil e as otimizações juntas
+    def get_conversion_funnel_data(): # Servirá o funil e as otimizações
         return jsonify({
             "funnelData": mock_conversion_funnel_data,
             "optimizations": mock_conversion_optimizations_data
@@ -162,3 +157,135 @@ class AdminAnalyticsController:
     @staticmethod
     def get_conversion_summary_data():
         return jsonify(mock_conversion_summary_data), 200
+
+    # --- Métodos da branch dvdweb2 ---
+    @staticmethod
+    def get_total_sales_data():
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        
+        current_total = round(random.uniform(500000, 800000), 2)
+        previous_total = round(current_total * random.uniform(0.85, 1.15), 2)
+        
+        if previous_total > 0:
+            trend_percentage = round(((current_total - previous_total) / previous_total) * 100, 2)
+        else:
+            trend_percentage = 0
+        
+        trend_direction = "up" if trend_percentage > 0 else "down" if trend_percentage < 0 else "neutral"
+        
+        daily_sales = []
+        for i in range(7):
+            day_sales = round(random.uniform(50000, 120000), 2)
+            daily_sales.append(day_sales)
+        
+        return jsonify({
+            "total_sales": current_total,
+            "previous_period_sales": previous_total,
+            "trend_percentage": abs(trend_percentage),
+            "trend_direction": trend_direction,
+            "currency": "BRL",
+            "period": {
+                "start_date": start_date or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d'),
+                "end_date": end_date or datetime.now().strftime('%Y-%m-%d')
+            },
+            "daily_sales_chart": daily_sales,
+            "formatted_total": f"R$ {current_total:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+            "last_updated": datetime.now().isoformat()
+        }), 200
+    
+    @staticmethod
+    def get_total_orders_data():
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        
+        current_orders = random.randint(2500, 4500)
+        previous_orders = random.randint(2000, 4000)
+        
+        if previous_orders > 0:
+            trend_percentage = round(((current_orders - previous_orders) / previous_orders) * 100, 2)
+        else:
+            trend_percentage = 0
+        
+        trend_direction = "up" if trend_percentage > 0 else "down" if trend_percentage < 0 else "neutral"
+        
+        weekday_orders = []
+        weekdays = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
+        for day in weekdays:
+            day_orders = random.randint(200, 800)
+            weekday_orders.append({
+                "day": day,
+                "orders": day_orders
+            })
+        
+        status_breakdown = {
+            "completed": random.randint(int(current_orders * 0.7), int(current_orders * 0.85)),
+            "pending": random.randint(int(current_orders * 0.1), int(current_orders * 0.2)),
+            "cancelled": random.randint(int(current_orders * 0.05), int(current_orders * 0.15))
+        }
+        
+        return jsonify({
+            "total_orders": current_orders,
+            "previous_period_orders": previous_orders,
+            "trend_percentage": abs(trend_percentage),
+            "trend_direction": trend_direction,
+            "period": {
+                "start_date": start_date or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d'),
+                "end_date": end_date or datetime.now().strftime('%Y-%m-%d')
+            },
+            "weekday_orders_chart": weekday_orders,
+            "status_breakdown": status_breakdown,
+            "average_orders_per_day": round(current_orders / 30, 1),
+            "last_updated": datetime.now().isoformat()
+        }), 200
+
+    @staticmethod
+    def get_new_customers_data():
+        monthly_new_customers_data = [
+            { "mes": "Jan", "novosClientes": random.randint(50, 80) },
+            { "mes": "Fev", "novosClientes": random.randint(40, 70) },
+            { "mes": "Mar", "novosClientes": random.randint(70, 100) },
+            { "mes": "Abr", "novosClientes": random.randint(75, 110) },
+            { "mes": "Mai", "novosClientes": random.randint(50, 80) },
+            { "mes": "Jun", "novosClientes": random.randint(65, 95) },
+            { "mes": "Jul", "novosClientes": random.randint(80, 120) },
+        ]
+
+        recent_customers_data = []
+        first_names = ["Mariana", "Rafael", "Juliana", "Lucas", "Beatriz", "Carlos", "Fernanda", "Ricardo", "Patricia", "Gustavo"]
+        last_names = ["Santos", "Oliveira", "Pereira", "Martins", "Almeida", "Costa", "Souza", "Lima", "Carvalho", "Rodrigues"]
+        channels = ["Orgânico", "Referência", "Social", "Campanha Email", "Direto"]
+        
+        for i in range(5):
+            days_ago = random.randint(1, 10)
+            recent_customers_data.append({
+                "id": f"USR{random.randint(100, 999):03d}",
+                "nome": f"{random.choice(first_names)} {random.choice(last_names)}",
+                "dataRegistro": (datetime.now() - timedelta(days=days_ago)).strftime('%Y-%m-%d'),
+                "canal": random.choice(channels)
+            })
+
+        total_novos_clientes_periodo = sum(item["novosClientes"] for item in monthly_new_customers_data)
+        
+        if len(monthly_new_customers_data) >= 2:
+            novos_clientes_mes_atual = monthly_new_customers_data[-1]["novosClientes"]
+            novos_clientes_mes_anterior = monthly_new_customers_data[-2]["novosClientes"]
+            if novos_clientes_mes_anterior > 0:
+                crescimento_percentual = round(((novos_clientes_mes_atual - novos_clientes_mes_anterior) / novos_clientes_mes_anterior) * 100, 1)
+            else:
+                crescimento_percentual = 0
+        else:
+            crescimento_percentual = 0
+            
+        cpa_estimado = round(random.uniform(10, 25), 2)
+
+        return jsonify({
+            "monthly_new_customers_chart": monthly_new_customers_data,
+            "recent_customers": recent_customers_data,
+            "summary_metrics": {
+                "total_new_customers_period": total_novos_clientes_periodo,
+                "growth_percentage_vs_previous_month": crescimento_percentual,
+                "estimated_cpa_brl": cpa_estimado
+            },
+            "last_updated": datetime.now().isoformat()
+        }), 200

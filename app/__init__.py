@@ -47,12 +47,12 @@ def create_app(config_class=Config):
     app.register_blueprint(ticket_routes.bp)
     app.register_blueprint(category_routes.bp)
     app.register_blueprint(order_routes.bp)
-    app.register_blueprint(payment_routes.bp)
+    app.register_blueprint(payment_routes.bp)    
     app.register_blueprint(cart_routes.bp)
     app.register_blueprint(card_routes.bp)
     app.register_blueprint(auth_routes.bp)
     app.register_blueprint(admin_routes.admin_bp)
-    app.register_blueprint(admin_analytics_routes.admin_analytics_bp)
+    app.register_blueprint(admin_analytics_routes.bp)
 
     # Chamar as funções de inicialização do DB Manager na ordem correta
     with app.app_context():
