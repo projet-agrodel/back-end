@@ -27,16 +27,12 @@ def create_user() -> tuple[Any, int]:
             return jsonify({'message': 'A senha deve conter pelo menos um número.'}), 400
 
         user = controller.users.create_user(data)
-<<<<<<< HEAD
-        return jsonify({'message': 'Usuário criado com sucesso', 'id': user.id }), 201
-=======
         return jsonify({
             'message': 'Usuário criado com sucesso', 
             'user': {'id': user.id, 'name': user.name, 'email': user.email, 'type': user.type.value }
         }), 201
     except ValueError as e: # Capturar ValueError para emails duplicados, etc.
         return jsonify({'message': str(e)}), 409 # 409 Conflict pode ser mais apropriado
->>>>>>> lucas
     except Exception as e:
         return jsonify({'message': str(e)}), 400
 
