@@ -3,6 +3,7 @@ from ..extensions import db, bcrypt
 from ..models.user import User
 from ..models.product import Product
 from ..models.category import Category
+from ..models.payment import Payment
 from decimal import Decimal
 
 def criar_tabelas(app):
@@ -23,7 +24,7 @@ def inserir_usuarios(app):
         if User.query.filter_by(email="alice@email.com").first() is None:
             print("Inserindo usuários fixos...")
             usuarios = [
-                User(name="Alice", email="alice@email.com", password=bcrypt.generate_password_hash("senha123").decode('utf-8'), phone="11999999999", type='admin'),
+                User(name="Alice", email="lucas@gmail.com.br", password=bcrypt.generate_password_hash("C123456789").decode('utf-8'), phone="11999999999", type='admin'),
                 User(name="Bob", email="bob@email.com", password=bcrypt.generate_password_hash("senha456").decode('utf-8'), phone="11888888888", type='admin'),
                 User(name="Charlie", email="charlie@email.com", password=bcrypt.generate_password_hash("senha789").decode('utf-8'), phone="11777777777", type='admin'),
             ]
@@ -131,3 +132,84 @@ def listar_produtos(app):
                 print(f"ID: {produto.id} | Nome: {produto.name} | Preço: R${produto.price} | Estoque: {produto.stock}")
         else:
             print("⚠️ Nenhum produto encontrado.")
+
+def inserir_pedidos_ficticios(app):
+    """Insere pedidos fictícios para teste no sistema."""
+    from app.models.order import Order, OrderItem, OrderStatus
+    from app.models.user import User
+    from app.models.product import Product
+    from datetime import datetime, timedelta
+    import random
+
+    with app.app_context():
+        if Order.query.first() is None:
+            print("Populando pedidos fictícios...")
+            
+            # Obtém usuários e produtos existentes
+            users = User.query.all()
+            products = Product.query.all()
+            
+            if not users or not products:
+                print("⚠️ Erro: Necessário ter usuários e produtos cadastrados primeiro")
+                return
+                
+            # Status possíveis para os pedidos
+            status_list = list(OrderStatus)
+            
+            # Cria 20 pedidos fictícios
+            orders_to_add = []
+            for i in range(20):
+                # Seleciona um usuário aleatório
+                user = random.choice(users)
+                
+                # Define uma data aleatória nos últimos 30 dias
+                random_days = random.randint(0, 30)
+                order_date = datetime.utcnow() - timedelta(days=random_days)
+                
+                # Cria o pedido
+                order = Order(
+                    user_id=user.id,
+                    description=f"Pedido de teste #{i+1}".encode(),
+                    status=random.choice(status_list),
+                    created_at=order_date,
+                    updated_at=order_date,
+                    amount=Decimal('0.0')  # Será calculado com base nos itens
+                )
+                
+                # Adiciona 1-5 itens aleatórios ao pedido
+                total_amount = Decimal('0.0')
+                num_items = random.randint(1, 5)
+                selected_products = random.sample(products, num_items)
+                
+                for product in selected_products:
+                    quantity = random.randint(1, 3)
+                    item_amount = product.price * Decimal(str(quantity))
+                    total_amount += item_amount
+                    
+                    order_item = OrderItem(
+                        pedido_id=order.id,
+                        produto_id=product.id,
+                        quantity=quantity,
+                        price=item_amount
+                    )
+                    order.items.append(order_item)
+                
+                order.payments.append(Payment(
+                    amount=total_amount,
+                    payment_method='PIX',
+                    pedido_id=order.id,
+                    transaction_id='34534254543345345'
+                ))
+
+                order.amount = total_amount
+                orders_to_add.append(order)
+            
+            try:
+                db.session.add_all(orders_to_add)
+                db.session.commit()
+                print(f"✅ {len(orders_to_add)} pedidos fictícios adicionados com sucesso!")
+            except Exception as e:
+                db.session.rollback()
+                print(f"Erro ao inserir pedidos fictícios: {e}")
+        else:
+            print("Pedidos já existem no banco de dados.")

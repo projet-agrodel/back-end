@@ -23,6 +23,7 @@ class User(db.Model):
             "id": self.id,
             "name": self.name,
             "email": self.email,
+            "password": str(self.password),
             "phone": self.phone,
             "type": self.type.value,
             "created_at": self.created_at.isoformat(), 

@@ -5,7 +5,7 @@ from .config import Config
 # Importar instâncias das extensões
 from .extensions import db, bcrypt, jwt, mail
 from flask_migrate import Migrate
-from .services.database_manager import criar_tabelas, inserir_categorias, inserir_produtos, inserir_usuarios
+from .services.database_manager import criar_tabelas, inserir_categorias, inserir_produtos, inserir_usuarios, inserir_pedidos_ficticios, deletar_tabelas
 from flask_jwt_extended import JWTManager
 
 def create_app(config_class=Config):
@@ -56,9 +56,11 @@ def create_app(config_class=Config):
 
     # Chamar as funções de inicialização do DB Manager na ordem correta
     with app.app_context():
+        deletar_tabelas(app)
         criar_tabelas(app)
         inserir_categorias(app)
         inserir_produtos(app)
         inserir_usuarios(app)
+        inserir_pedidos_ficticios(app)
 
     return app 
