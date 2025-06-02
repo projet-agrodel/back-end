@@ -16,7 +16,8 @@ class OrderController(BaseController[Order]):
             order_items = []
 
             for item in items:
-                product = Product.query.get_or_404(item['product_id'])
+                product = Product.query.get_or_404(item['produto_id'])
+
                 if product.stock < item['quantity']:
                     raise ValueError(f"Produto {product.name} sem estoque suficiente")
                 
@@ -29,7 +30,7 @@ class OrderController(BaseController[Order]):
                 })
 
             order = self.create({
-                'user_id': user_id,
+                'user_id': int(user_id),
                 'description': description,
                 'amount': total_amount,
                 'status': OrderStatus.EM_PROCESSAMENTO
@@ -40,7 +41,7 @@ class OrderController(BaseController[Order]):
                     pedido_id=order.id,
                     produto_id=item['product'].id,
                     quantity=item['quantity'],
-                    amount=item['amount']
+                    price=item['amount']
                 )
                 self._db.session.add(order_item)
                 item['product'].stock -= item['quantity']

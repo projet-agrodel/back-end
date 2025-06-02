@@ -13,8 +13,8 @@ class Order(db.Model):
     __tablename__ = 'pedido'
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    description = db.Column(db.LargeBinary)
-    status = db.Column(db.Enum(OrderStatus), nullable=False, default=OrderStatus.EM_PROCESSAMENTO)
+    description = db.Column(db.String(20))
+    status = db.Column(db.String(40), nullable=False, default=OrderStatus.EM_PROCESSAMENTO)
     amount = db.Column(db.Numeric(10, 2), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -29,7 +29,7 @@ class Order(db.Model):
         return {
             'id': self.id,
             'description': self.description.decode() if self.description else None,
-            'status': self.status.value,
+            'status': self.status,
             'amount': float(self.amount),
             'user_id': self.user_id,
             'created_at': self.created_at.isoformat(),

@@ -3,10 +3,14 @@ from app.models.payment import Payment
 from app.models.order import Order
 from app.controllers.base.base_controller import BaseController
 from decimal import Decimal
+from mercadopago import SDK
+import os
 
 class PaymentController(BaseController[Payment]):
+
     def __init__(self) -> None:
         super().__init__(Payment)
+        self.sdk = SDK(os.environ.get('SDK_KEY'))
 
     def create_payment(
         self, 

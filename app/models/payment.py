@@ -8,7 +8,7 @@ class Payment(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     pedido_id = db.Column(db.Integer, db.ForeignKey('pedido.id', ondelete='CASCADE'))
-    payment_method = db.Column(db.Enum('Cartão', 'PIX', name='payment_method'), nullable=False)
+    payment_method = db.Column(db.Enum('Cartão', 'PIX', name='payment_method', native_enum=False), nullable=False)
     status = db.Column(db.Enum('Aprovado', 'Pendente', 'Rejeitado', name='payment_status'), default='Pendente', nullable=False)
     amount = db.Column(db.Numeric(10,2), nullable=False)
     transaction_id = db.Column(db.String(255))

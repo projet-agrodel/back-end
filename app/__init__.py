@@ -56,11 +56,11 @@ def create_app(config_class=Config):
 
     # Chamar as funções de inicialização do DB Manager na ordem correta
     with app.app_context():
-        deletar_tabelas(app)
+        #deletar_tabelas(app)
         criar_tabelas(app)
         inserir_categorias(app)
         inserir_produtos(app)
         inserir_usuarios(app)
-        inserir_pedidos_ficticios(app)
+        #inserir_pedidos_ficticios(app)
 
     return app 

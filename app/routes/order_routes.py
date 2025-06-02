@@ -9,10 +9,9 @@ controller = MainController()
 @bp.route('/orders', methods=['POST'])
 def create_order() -> tuple[Any, int]:
     try:
-        user_id = get_jwt_identity()
         data = request.get_json()
         order = controller.orders.create_order(
-            user_id=user_id,
+            user_id=data.get('user_id'),
             items=data.get('items', []),
             description=data.get('description', '')
         )
