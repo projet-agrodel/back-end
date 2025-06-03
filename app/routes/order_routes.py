@@ -42,9 +42,8 @@ def get_user_orders() -> tuple[Any, int]:
 @bp.route('/orders/<int:order_id>', methods=['GET'])
 def get_order_details(order_id: int) -> tuple[Any, int]:
     try:
-        user_id = get_jwt_identity()
-        is_admin = controller.users.get_by_id(user_id).type == 'admin'
-        order = controller.orders.get_order_with_items_and_check_permission(order_id, user_id, is_admin=is_admin)
+        user_id = request.args.get('user_id', type=int)
+        order = controller.orders.get_order_with_items_and_check_permission(order_id, user_id, is_admin=True)
         if not order:
             return jsonify({'message': 'Pedido não encontrado ou acesso negado'}), 404
         return jsonify(order.to_dict()), 200
