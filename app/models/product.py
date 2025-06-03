@@ -14,7 +14,7 @@ class Product(db.Model):
     status = db.Column(db.String(50), default='Ativo', nullable=False)
     isPromotion = db.Column(db.Boolean, default=False, nullable=False)
     stock = db.Column(db.Integer, nullable=False)
-    category_id = db.Column(db.Integer, db.ForeignKey('categoria.id'), nullable=True)
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     

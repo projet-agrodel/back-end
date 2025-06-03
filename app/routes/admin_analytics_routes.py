@@ -54,7 +54,7 @@ def taxa_conversao_details():
 @bp.route('/taxa-conversao/summary', methods=['GET'])
 @admin_required()
 def taxa_conversao_summary():
-    return AdminAnalyticsController.get_conversion_summary_data()
+    return AdminAnalyticsController.get_conversion_summary_data() 
 
 # --- Rotas para Visitantes Únicos (detalhes) ---
 @bp.route('/visitantes-unicos/details', methods=['GET'])

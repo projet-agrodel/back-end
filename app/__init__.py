@@ -50,13 +50,7 @@ def create_app(config_class=Config):
     app.register_blueprint(admin_analytics_routes.bp)
 
     # Configurar CORS DEPOIS de registrar todos os blueprints
-    # Para diagnóstico, começamos com origins="*", mas o ideal é restringir.
-    CORS(app, resources={r"/api/*": {"origins": "*"}, r"/admin/*": {"origins": "*"}}, supports_credentials=True)
-    # Ou, para ser mais específico com sua necessidade original:
-    # CORS(app, resources={
-    #    r"/api/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000"]},
-    #    r"/admin/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000"]}
-    # }, supports_credentials=True)
+    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
 
     with app.app_context():
         criar_tabelas(app)
