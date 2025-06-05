@@ -136,14 +136,16 @@ class OrderController(BaseController[Order]):
             raise e 
     
     def update_status_by_api_payament(self, order_id):
-        order = self.get_order_with_items_and_check_permission()      
+        order = self.get_order_with_items(order_id)      
 
         if len(order.payments) == 0:
             return None
         
         payment = order.payments[0]
 
-        details = self.pay
+        details = self.client.payments.check_payment_status(payment.transaction_id)
+
+        return details
 
         status_mapping = {
             'approved': 'Aprovado',
