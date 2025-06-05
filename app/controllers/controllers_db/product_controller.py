@@ -4,11 +4,13 @@ from ..base.base_controller import BaseController
 from ...extensions import db
 from sqlalchemy import or_, asc, desc
 from decimal import Decimal
+from ..base.main_controller import MainController
+
 # from ...models.category import Category # Não é estritamente necessário para este filtro simples
 
 class ProductController(BaseController[Product]):
-    def __init__(self) -> None:
-        super().__init__(Product)
+    def __init__(self, client: MainController) -> None:
+        super().__init__(Product, client)
 
     def create_product(self, data: dict) -> Product:
         try:

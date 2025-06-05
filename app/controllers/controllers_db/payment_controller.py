@@ -4,12 +4,13 @@ from app.models.order import Order
 from app.controllers.base.base_controller import BaseController
 from decimal import Decimal
 from mercadopago import SDK
+from ..base.main_controller import MainController
 import os
 
 class PaymentController(BaseController[Payment]):
 
-    def __init__(self) -> None:
-        super().__init__(Payment)
+    def __init__(self, client: MainController) -> None:
+        super().__init__(Payment, client)
         self.sdk = SDK(os.environ.get('SDK_KEY'))
 
     def create_payment(
@@ -58,25 +59,14 @@ class PaymentController(BaseController[Payment]):
     def get_by_transaction_id(self, transaction_id: str) -> Optional[Payment]:
         return self.get_query().filter_by(transaction_id=transaction_id).first()
 
-    def check_payment_status(self, payment_id: int) -> dict:
-        try:
-            payment = self.get_by_id(payment_id)
-            if not payment:
-                return {'error': 'Pagamento não encontrado'}
+    def check_payment_status(self, transaction_id: int) -> dict:
+        
+    
+        payment_info = self.sdk.preference().get(transaction_id)
+        
+        if payment_info['status'] == 200:
+            mp_payment = payment_info['response']
 
-            # Consulta o status do pagamento no Mercado Pago
-            payment_info = self.sdk.payment().get(payment.transaction_id)
-            
-            if payment_info['status'] == 200:
-                mp_payment = payment_info['response']
-                return {
-                    'status': mp_payment['status'],
-                    'status_detail': mp_payment['status_detail'],
-                    'payment_method': mp_payment['payment_method_id'],
-                    'transaction_amount': mp_payment['transaction_amount'],
-                    'last_updated': mp_payment['last_updated']
-                }
-            
-            return {'error': 'Erro ao consultar status do pagamento'}
-        except Exception as e:
-            return {'error': str(e)} 
+            return mp_payment
+        
+        return None

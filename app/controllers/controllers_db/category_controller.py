@@ -1,10 +1,11 @@
 from typing import List, Optional
 from app.models.category import Category
 from app.controllers.base.base_controller import BaseController
+from ..base.main_controller import MainController
 
 class CategoryController(BaseController[Category]):
-    def __init__(self) -> None:
-        super().__init__(Category)
+    def __init__(self, client: MainController) -> None:
+        super().__init__(Category, self)
 
     def create_category(self, name: str) -> Category:
         try:

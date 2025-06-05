@@ -1,13 +1,15 @@
 from typing import TypeVar, Generic, Optional, List, Any
 from app import db
 from sqlalchemy.orm import Query
+from ..base.main_controller import MainController
 
 T = TypeVar('T')
 
 class BaseController(Generic[T]):
-    def __init__(self, model: T) -> None:
+    def __init__(self, model: T, client: MainController) -> None:
         self.model = model
         self._db = db
+        self.client = client
 
     def create(self, data: dict) -> T:
         try:

@@ -2,10 +2,11 @@ from typing import List, Optional, Dict
 from app.models.cart import Cart, CartItem
 from app.models.product import Product
 from app.controllers.base.base_controller import BaseController
+from ..base.main_controller import MainController
 
 class CartController(BaseController[Cart]):
-    def __init__(self) -> None:
-        super().__init__(Cart)
+    def __init__(self, client: MainController) -> None:
+        super().__init__(Cart, client)
 
     def get_or_create_cart(self, user_id: int) -> Cart:
         cart = self.get_query().filter_by(user_id=user_id).first()

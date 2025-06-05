@@ -4,11 +4,11 @@ from app.models.product import Product
 from app.models.user import User
 from app.controllers.base.base_controller import BaseController
 from decimal import Decimal
-from sqlalchemy import or_
+from ..base.main_controller import MainController
 
 class OrderController(BaseController[Order]):
-    def __init__(self) -> None:
-        super().__init__(Order)
+    def __init__(self, client: MainController) -> None:
+        super().__init__(Order, client)
 
     def create_order(self, user_id: int, items: List[Dict], description: bytes) -> Order:
         try:
@@ -134,3 +134,22 @@ class OrderController(BaseController[Order]):
         except Exception as e:
             self._db.session.rollback()
             raise e 
+    
+    def update_status_by_api_payament(self, order_id):
+        order = self.get_order_with_items_and_check_permission()      
+
+        if len(order.payments) == 0:
+            return None
+        
+        payment = order.payments[0]
+
+        details = self.pay
+
+        status_mapping = {
+            'approved': 'Aprovado',
+            'pending': 'Pendente',
+            'in_process': 'Em Processamento',
+            'rejected': 'Rejeitado',
+            'cancelled': 'Cancelado',
+            'refunded': 'Reembolsado'
+        }
