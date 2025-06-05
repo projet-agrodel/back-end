@@ -2,10 +2,11 @@ from typing import List, Optional
 from app.models.card import Card
 from app.controllers.base.base_controller import BaseController
 from app.services.encryption_service import EncryptionService
+from ..base.main_controller import MainController
 
 class CardController(BaseController[Card]):
-    def __init__(self, encryption_service: EncryptionService) -> None:
-        super().__init__(Card)
+    def __init__(self, encryption_service: EncryptionService, client: MainController) -> None:
+        super().__init__(Card, client)
         self.encryption_service = encryption_service
 
     def create_card(

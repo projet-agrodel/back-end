@@ -3,17 +3,22 @@ from app.models.payment import Payment
 from app.models.order import Order
 from app.controllers.base.base_controller import BaseController
 from decimal import Decimal
+from mercadopago import SDK
+from ..base.main_controller import MainController
+import os
 
 class PaymentController(BaseController[Payment]):
-    def __init__(self) -> None:
-        super().__init__(Payment)
+
+    def __init__(self, client: MainController) -> None:
+        super().__init__(Payment, client)
+        self.sdk = SDK(os.environ.get('SDK_KEY'))
 
     def create_payment(
         self, 
         order_id: int, 
         payment_method: str, 
         amount: Decimal,
-        transaction_id: bytes
+        transaction_id: str
     ) -> Payment:
         try:
             order = Order.query.get_or_404(order_id)
@@ -49,4 +54,48 @@ class PaymentController(BaseController[Payment]):
         return self.get_query().filter_by(pedido_id=order_id).all()
 
     def get_pending_payments(self) -> List[Payment]:
-        return self.get_query().filter_by(status='Pendente').all() 
+        return self.get_query().filter_by(status='Pendente').all()
+
+    def get_by_transaction_id(self, transaction_id: str) -> Optional[Payment]:
+        return self.get_query().filter_by(transaction_id=transaction_id).first()
+
+    def check_payment_status(self, transaction_id: int) -> dict:
+        payment_info = self.sdk.preference().get(transaction_id)
+        
+        if payment_info['status'] == 200:
+            mp_payment = payment_info['response']
+
+            return mp_payment
+        
+        return None
+
+    def create_payament_api(self, order_id, items):
+
+        if not order_id:
+            raise Exception('ID pedido invalido')
+
+        def map_item(item):
+            return {
+                'id': item['produto']['id'],
+                'unit_price': item['produto']['price'],
+                'title': item['produto']['name'],
+                'quantity': item['quantity'],
+                'currency_id': 'BRL'
+            }
+
+        items_order = list(map(map_item, items))
+
+        data = {
+            'items': items_order,
+            "back_urls": {
+                "success": f"http://127.0.0.1:3000/pedidos/{order_id}",
+                "failure": f"http://127.0.0.1:3000/pedidos/{order_id}",
+                "pending": f"http://127.0.0.1:3000/pedidos/{order_id}"
+            },
+        }
+
+        return data
+
+        payament = self.sdk.preference().create(data)
+
+        return payament

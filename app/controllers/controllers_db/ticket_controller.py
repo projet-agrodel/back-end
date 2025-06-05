@@ -4,10 +4,11 @@ from app.controllers.base.base_controller import BaseController
 from app import db
 import os
 from werkzeug.utils import secure_filename
+from ..base.main_controller import MainController
 
 class TicketController(BaseController[Ticket]):
-    def __init__(self) -> None:
-        super().__init__(Ticket)
+    def __init__(self, client) -> None:
+        super().__init__(Ticket, client)
 
     def create_ticket(self, user_id: int, data: Dict) -> Ticket:
         try:
@@ -105,8 +106,8 @@ class TicketController(BaseController[Ticket]):
         return self.get_query().filter_by(priority=priority).all()
 
 class TicketMessageController(BaseController[TicketMessage]):
-    def __init__(self) -> None:
-        super().__init__(TicketMessage)
+    def __init__(self, client: MainController) -> None:
+        super().__init__(TicketMessage, client)
 
     def create_message(self, ticket_id: int, user_id: int, message: str) -> TicketMessage:
         try:

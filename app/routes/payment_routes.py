@@ -5,26 +5,34 @@ from app.utils.decorators import admin_required
 from typing import Any
 from decimal import Decimal
 
-bp = Blueprint('payments', __name__)
+bp = Blueprint('payments', __name__, url_prefix='/api')
 controller = MainController()
 
 @bp.route('/payments', methods=['POST'])
-
 def create_payment() -> tuple[Any, int]:
     try:
         data = request.get_json()
         
+        order_id = data.get('order_id')
+        items = data.get('items')
+
+        payment_api = controller.payments.create_payament_api(order_id, items)
+        response = payment_api['response']
+
+        if payment_api['status'] not in [200, 201]:
+            return jsonify({ 'error': response }), 500
+
         payment = controller.payments.create_payment(
-            order_id=data.get('order_id'),
+            order_id=order_id,
             payment_method=data.get('payment_method'),
             amount=Decimal(str(data.get('amount'))),
-            transaction_id=data.get('transaction_id', '')
+            transaction_id=response['id']
         )
         
         return jsonify({
-            'message': 'Pagamento registrado com sucesso', 
-            'id': payment.id,
-            'status': payment.status
+            'message': 'Pagamento registrado com sucesso',
+            'payament': payment.to_dict(),
+            'api': response
         }), 201
     except ValueError as e:
         return jsonify({'message': str(e)}), 400
@@ -32,7 +40,6 @@ def create_payment() -> tuple[Any, int]:
         return jsonify({'message': str(e)}), 500
 
 @bp.route('/payments/order/<int:order_id>', methods=['GET'])
-
 def get_order_payments(order_id: int) -> tuple[Any, int]:
     try:
         payments = controller.payments.get_order_payments(order_id)
@@ -41,8 +48,6 @@ def get_order_payments(order_id: int) -> tuple[Any, int]:
         return jsonify({'message': str(e)}), 500
 
 @bp.route('/payments/<int:payment_id>/status', methods=['PUT'])
-
-
 def update_payment_status(payment_id: int) -> tuple[Any, int]:
     try:
         data = request.get_json()
@@ -64,8 +69,6 @@ def update_payment_status(payment_id: int) -> tuple[Any, int]:
         return jsonify({'message': str(e)}), 500
 
 @bp.route('/payments/pending', methods=['GET'])
-
-
 def get_pending_payments() -> tuple[Any, int]:
     try:
         payments = controller.payments.get_pending_payments()

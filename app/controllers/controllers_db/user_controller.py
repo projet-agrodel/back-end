@@ -3,10 +3,11 @@ from ...models.user import User, UserType
 from ..base.base_controller import BaseController
 from ...extensions import bcrypt, db
 from datetime import datetime
+from ..base.main_controller import MainController
 
 class UserController(BaseController[User]):
-    def __init__(self) -> None:
-        super().__init__(User)
+    def __init__(self, client: MainController) -> None:
+        super().__init__(User, client)
 
     def create_user(self, data: dict) -> User:
         try:
