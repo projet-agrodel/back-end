@@ -37,6 +37,48 @@ def inserir_usuarios(app):
         else:
             print("Usuários fixos já existem.")
 
+# Função para inserir clientes fictícios
+def inserir_clientes_ficticios(app):
+    with app.app_context():
+        print("Verificando se clientes fictícios precisam ser inseridos...")
+        clientes_ficticios_data = [
+            {"name": "Fernanda Lima", "email": "fernanda.lima@example.com", "password": "Password123", "phone": "21987654321", "type": "user"},
+            {"name": "Ricardo Souza", "email": "ricardo.souza@example.com", "password": "Password123", "phone": "31912345678", "type": "user"},
+            {"name": "Camila Oliveira", "email": "camila.oliveira@example.com", "password": "Password123", "phone": "41988887777", "type": "user"},
+            {"name": "Lucas Martins", "email": "lucas.martins@example.com", "password": "Password123", "phone": "51977778888", "type": "user"},
+            {"name": "Juliana Alves", "email": "juliana.alves@example.com", "password": "Password123", "phone": "61966665555", "type": "user"},
+            {"name": "Gabriel Pereira", "email": "gabriel.pereira@example.com", "password": "Password123", "phone": "71955556666", "type": "user"},
+            {"name": "Beatriz Costa", "email": "beatriz.costa@example.com", "password": "Password123", "phone": "81944443333", "type": "user"},
+            {"name": "Matheus Ferreira", "email": "matheus.ferreira@example.com", "password": "Password123", "phone": "91933334444", "type": "user"},
+            {"name": "Larissa Rodrigues", "email": "larissa.rodrigues@example.com", "password": "Password123", "phone": "11922221111", "type": "user"},
+            {"name": "Thiago Almeida", "email": "thiago.almeida@example.com", "password": "Password123", "phone": "22911112222", "type": "user"}
+        ]
+
+        clientes_para_adicionar = []
+        for cliente_data in clientes_ficticios_data:
+            if User.query.filter_by(email=cliente_data["email"]).first() is None:
+                hashed_password = bcrypt.generate_password_hash(cliente_data["password"]).decode('utf-8')
+                clientes_para_adicionar.append(
+                    User(
+                        name=cliente_data["name"],
+                        email=cliente_data["email"],
+                        password=hashed_password,
+                        phone=cliente_data["phone"],
+                        type=cliente_data["type"]
+                    )
+                )
+        
+        if clientes_para_adicionar:
+            try:
+                db.session.add_all(clientes_para_adicionar)
+                db.session.commit()
+                print(f"✅ {len(clientes_para_adicionar)} clientes fictícios inseridos com sucesso!")
+            except Exception as e:
+                db.session.rollback()
+                print(f"Erro ao inserir clientes fictícios: {e}")
+        else:
+            print("Nenhum novo cliente fictício para adicionar ou já existem.")
+
 # Função para inserir categorias
 def inserir_categorias(app):
     """Insere as categorias padrão do Agrodel se não existirem."""

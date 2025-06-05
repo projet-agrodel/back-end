@@ -5,8 +5,8 @@ from .config import Config
 # Importar instâncias das extensões
 from .extensions import db, bcrypt, jwt, mail
 from flask_migrate import Migrate
-from .services.database_manager import criar_tabelas, inserir_categorias, inserir_produtos, inserir_usuarios
-# from flask_jwt_extended import JWTManager # JWTManager já está em extensions.jwt
+from .services.database_manager import criar_tabelas, inserir_categorias, inserir_produtos, inserir_usuarios, inserir_clientes_ficticios
+from flask_jwt_extended import JWTManager
 
 def create_app(config_class=Config):
     app = Flask(__name__, instance_relative_config=False) # Garantir que instance folder não interfira
@@ -58,5 +58,6 @@ def create_app(config_class=Config):
         inserir_categorias(app)
         inserir_produtos(app)
         inserir_usuarios(app)
+        inserir_clientes_ficticios(app)
 
     return app 
