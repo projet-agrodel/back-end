@@ -2,8 +2,6 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.controllers.base.main_controller import MainController
 from typing import Any
-from app.controllers.order_controller import OrderController
-
 
 bp = Blueprint('orders', __name__, url_prefix='/api')
 controller = MainController()
@@ -43,6 +41,14 @@ def get_user_orders() -> tuple[Any, int]:
     except Exception as e:
         return jsonify({'message': str(e)}), 500
 
+@bp.route('/orders/all', methods=['GET'])
+def get_orders() -> tuple[Any, int]:
+    try:
+        orders = controller.orders.get_all()
+        return jsonify([order.to_dict() for order in orders]), 200
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
+
 @bp.route('/orders/<int:order_id>', methods=['GET'])
 def get_order_details(order_id: int) -> tuple[Any, int]:
     try:
@@ -56,33 +62,6 @@ def get_order_details(order_id: int) -> tuple[Any, int]:
     except Exception as e:
         return jsonify({'message': str(e)}), 500
 
-<<<<<<< HEAD
-@order_bp.route('', methods=['GET'])
-# @admin_required()
-def get_orders_route():
-    return OrderController.get_orders()
-
-@order_bp.route('/<string:order_id>', methods=['GET'])
-# @admin_required()
-def get_order_route(order_id):
-    return OrderController.get_order_by_id(order_id)
-
-@order_bp.route('/<string:order_id>/status', methods=['PATCH'])
-# @admin_required()
-def update_order_status_route(order_id):
-    return OrderController.update_order_status(order_id)
-
-# Exemplo de como seriam outras rotas, se implementadas no controller:
-# @order_bp.route('', methods=['POST'])
-# # @admin_required()
-# def create_order_route():
-#     return OrderController.create_order()
-
-# @order_bp.route('/<string:order_id>', methods=['DELETE'])
-# # @admin_required()
-# def delete_order_route(order_id):
-#     return OrderController.delete_order() 
-=======
 @bp.route('/orders/<int:order_id>', methods=['PUT'])
 def update_order_status(order_id: int) -> tuple[Any, int]:
     try:
@@ -127,4 +106,3 @@ def delete_order(order_id: int) -> tuple[Any, int]:
         return jsonify({'message': str(e)}), 403
     except Exception as e:
         return jsonify({'message': str(e)}), 500 
->>>>>>> lucas
