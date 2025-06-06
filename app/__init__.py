@@ -51,7 +51,7 @@ def create_app(config_class=Config):
     app.register_blueprint(admin_analytics_routes.bp)
 
     # Configurar CORS DEPOIS de registrar todos os blueprints
-    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
+    CORS(app, origins=["http://localhost:3000", "http://frontend:3000"], supports_credentials=True)
 
     with app.app_context():
         #deletar_tabelas(app)
