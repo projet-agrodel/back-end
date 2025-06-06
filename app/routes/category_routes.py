@@ -3,7 +3,7 @@ from app.controllers.base.main_controller import MainController
 from app.utils.decorators import admin_required
 from typing import Any
 
-bp = Blueprint('categories', __name__, url_prefix='/categories')
+bp = Blueprint('categories', __name__, url_prefix='/api/categories')
 
 controller = MainController()
 

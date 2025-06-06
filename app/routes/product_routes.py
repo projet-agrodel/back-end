@@ -6,6 +6,14 @@ from typing import Any
 bp = Blueprint('admin_products', __name__, url_prefix='/admin')
 controller = MainController()
 
+@bp.route('/products/all', methods=['GET'])
+def get_categories():
+    try:
+        produtos = controller.products.get_all()
+        return jsonify({ 'products': [produto.to_dict() for produto in produtos] })
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
+
 @bp.route('/products', methods=['POST'])
 @admin_required()
 def create_product() -> tuple[Any, int]:
