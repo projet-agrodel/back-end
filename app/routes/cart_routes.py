@@ -88,12 +88,9 @@ def remove_item_from_cart(product_id: int) -> tuple[Any, int]:
 def clear_cart() -> tuple[Any, int]:
     try:
         user_id = get_jwt_identity()
-        cart = controller.carts.get_or_create_cart(user_id)
         
-        # Remover todos os itens do carrinho
-        from app.models.cart import CartItem
-        CartItem.query.filter_by(carrinho_id=cart.id).delete()
-        controller._db.session.commit()
+        cart = controller.carts.get_or_create_cart(user_id)
+        controller.carts.delete(cart.id)
         
         return jsonify({'message': 'Carrinho esvaziado com sucesso'}), 200
     except Exception as e:

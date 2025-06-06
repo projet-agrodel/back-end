@@ -6,7 +6,7 @@ from decimal import Decimal
 
 class OrderStatus(str, Enum):
     EM_PROCESSAMENTO = 'Em Processamento'
-    NAO_AUTORIZADO = 'Não autorizado'
+    NAO_AUTORIZADO = 'Não Autorizado'
     CONCLUIDO = 'Concluido'
 
 class Order(db.Model):
