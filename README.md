@@ -41,13 +41,23 @@ docker-compose up -d --build
 
 > O Docker irá construir e iniciar automaticamente todos os serviços necessários.
 
----
+
 
 ## 🔗 Endpoints de acesso
 
 * **Front-End:** [http://localhost:3000](http://localhost:3000)
 * **Back-End (API):** [http://localhost:5000](http://localhost:5000)
 * **Banco de Dados (PostgreSQL):** acessível na porta `5432`
+
+## Usuários já cadastrados
+
+* Admin:
+   - Email: lucas@gmail.com.br
+   - Senha: C123456789
+     
+* Usuário Comun
+  - Email: fernanda.lima@example.com
+  - Senha: Password123
 
 ---
 
