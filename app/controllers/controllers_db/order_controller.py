@@ -26,7 +26,7 @@ class OrderController(BaseController[Order]):
                 order_items.append({
                     'product': product,
                     'quantity': item['quantity'],
-                    'amount': item_amount
+                    'amount': product.price
                 })
 
             order = self.create({
