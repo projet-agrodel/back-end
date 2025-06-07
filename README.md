@@ -1,40 +1,57 @@
-### Agrodel Back-End
+# 🌾 Agrodel - Back-End
 
-Este é o repositório do backend da aplicação. Utilizamos Docker para facilitar a configuração e execução.
+Este é o repositório responsável pelo back-end da aplicação **Agrodel**. Utilizamos **Docker** e **Docker Compose** para facilitar a configuração e execução de todo o ambiente.
 
-Se você quiser executar o front-end, vá para [Agroldel Front-end](https://github.com/projet-agrodel/front-end)
+Se você está procurando o front-end da aplicação, acesse: [Agrodel Front-End](https://github.com/projet-agrodel/front-end)
 
-## 🛠️ Requisitos
+---
 
-- [Docker](https://www.docker.com/) ou [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalados
+## ✅ Requisitos
 
-## 🚀 Como rodar o backend
+Antes de começar, certifique-se de ter o seguinte instalado em sua máquina:
 
-1. Clone este repositório:
+* [Docker](https://www.docker.com/)
+
+---
+
+## Como executar o projeto
+
+Siga os passos abaixo para iniciar o ambiente local:
+
+1. **Clone este repositório:**
 
 ```bash
 git clone https://github.com/projet-agrodel/back-end
-
 cd back-end
-````
+```
 
-2. Crie um arquivo .env na raiz do projeto e copie o contéudo de .env.example e cole lá
+2. **Crie um arquivo `.env` na raiz do projeto:**
 
-4. Suba os containers com Docker Compose:
+Copie o conteúdo do arquivo `.env.example` e cole no novo arquivo `.env`.
+
+```bash
+cp .env.example .env
+```
+
+3. **Suba os containers com Docker Compose:**
 
 ```bash
 docker-compose up -d --build
 ```
 
-> O Docker irá criar e iniciar todos os serviços necessários automaticamente.
+> O Docker irá construir e iniciar automaticamente todos os serviços necessários.
 
-3. Após isso o sistema estará rodando em
+---
 
-[http://localhost\:3000](http://localhost:3000) (Front-end)
-[http://localhost\:5000](http://localhost:5000) (Back-end)
-[http://localhost\:5000](http://localhost:5000) (Banco de Dados)
+## 🔗 Endpoints de acesso
 
-## Observações
+* **Front-End:** [http://localhost:3000](http://localhost:3000)
+* **Back-End (API):** [http://localhost:5000](http://localhost:5000)
+* **Banco de Dados (PostgreSQL):** acessível na porta `5432`
 
-1. Se tiver o postegresql na sua mquina, possa ser necessário desativar o serviço para evitar conflitos
-2. Possa ser q o banco de dados demore para iniciar, fazendo com que o back-end não inicie, se isso acontecer suba o container de back-end
+---
+
+## ⚠️ Observações
+
+* Se você já possui o **PostgreSQL** instalado localmente, pode ser necessário parar o serviço para evitar conflitos de porta com o container.
+* Em alguns casos, o container do banco de dados pode demorar um pouco para estar pronto, fazendo com que o back-end falhe ao iniciar. Se isso acontecer, aguarde alguns segundos e reinicie apenas o container do back-end.
