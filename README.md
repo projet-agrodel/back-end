@@ -1,80 +1,40 @@
-# 🐳 Projeto Agrodrel
+### Agrodel Back-End
 
-Este projeto é composto por dois repositórios separados:
+Este é o repositório do backend da aplicação. Utilizamos Docker para facilitar a configuração e execução.
 
-- **Frontend** (`front`)
-- **Backend** (`back`)
+Se você quiser executar o front-end, vá para [Agroldel Front-end](https://github.com/projet-agrodel/front-end)
 
----
-## 📁 Estrutura de Diretórios
+## 🛠️ Requisitos
 
-A estrutura esperada após clonar e organizar os repositórios é a seguinte:
+- [Docker](https://www.docker.com/) ou [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalados
 
-```
-agrodrel/
-├── back-end/
-├── front-end/
-└── docker-compose.yml
-```
+## 🚀 Como rodar o backend
 
----
-
-## 🚀 Passo a Passo
-
-### 1. Clone os Repositórios
-
-Crie uma pasta principal para o projeto e entre nela:
+1. Clone este repositório:
 
 ```bash
-mkdir agrodrel
-cd agrodrel
-```
+git clone https://github.com/projet-agrodel/back-end
 
-Clone os dois repositórios dentro dessa pasta:
+cd back-end
+````
 
-```bash
-git clone https://github.com/projet-agrodel/front-end front-end
-git clone https://github.com/projet-agrodel/back-end back-end
-```
+2. Crie um arquivo .env na raiz do projeto e copie o contéudo de .env.example e cole lá
 
-> 📝 Substitua os links acima pelos repositórios reais.
-
----
-
-### 2. Mova o `docker-compose.yml` que está na pasta end para a raiz
-
-O arquivo `docker-compose.yml` estiver dentro da pasta `front/`, mova-o para a raiz da pasta principal:
+4. Suba os containers com Docker Compose:
 
 ```bash
-mv front/docker-compose.yml .
+docker-compose up -d --build
 ```
 
----
+> O Docker irá criar e iniciar todos os serviços necessários automaticamente.
 
-### 3. Inicie os Containers
+3. Após isso o sistema estará rodando em
 
-Com tudo organizado, execute o seguinte comando na raiz do projeto:
+[http://localhost\:3000](http://localhost:3000) (Front-end)
+[http://localhost\:5000](http://localhost:5000) (Back-end)
+[http://localhost\:5000](http://localhost:5000) (Banco de Dados)
 
-```bash
-docker-compose up --build
-```
+## Observações
 
-Esse comando irá:
-
-- Construir as imagens do frontend e backend e banco de dados
-- Subir os containers
-- Expor as portas configuradas no `docker-compose.yml`
-
----
-
-## ✅ Acesso aos Serviços
-
-- Frontend: [http://localhost:3000](http://localhost:3000)
-- Backend: [http://localhost:5000](http://localhost:5000)
-- Banco de Dados: [http://localhost:5432](http://localhost:5432)
-
-## 🛠️ Observações
-
-- Verifique se as portas 3000 (frontend) e 5000 e 5432 (backend) estão livres no seu sistema.
-- Se necessário, edite o `docker-compose.yml` para ajustar caminhos de build e nomes de serviços.
-- Se tiver o Postgres instalado na sua máquina, desative seu serviço caso o container do banco de dados não subir.
+1. Se tiver o postegresql na sua mquina, possa ser necessário desativar o serviço para evitar conflitos
+2. Possa ser q o banco de dados demore para iniciar, fazendo com que o back-end não inicie, se isso acontecer suba o container de back-end

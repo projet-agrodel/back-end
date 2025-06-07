@@ -3,7 +3,6 @@ from app.models.payment import Payment
 from app.models.order import Order
 from app.controllers.base.base_controller import BaseController
 from decimal import Decimal
-from mercadopago import SDK
 from ..base.main_controller import MainController
 import os
 
@@ -11,7 +10,6 @@ class PaymentController(BaseController[Payment]):
 
     def __init__(self, client: MainController) -> None:
         super().__init__(Payment, client)
-        self.sdk = SDK(os.environ.get('SDK_KEY'))
 
     def create_payment(
         self, 
@@ -68,34 +66,3 @@ class PaymentController(BaseController[Payment]):
             return mp_payment
         
         return None
-
-    def create_payament_api(self, order_id, items):
-
-        if not order_id:
-            raise Exception('ID pedido invalido')
-
-        def map_item(item):
-            return {
-                'id': item['produto']['id'],
-                'unit_price': item['produto']['price'],
-                'title': item['produto']['name'],
-                'quantity': item['quantity'],
-                'currency_id': 'BRL'
-            }
-
-        items_order = list(map(map_item, items))
-
-        data = {
-            'items': items_order,
-            "back_urls": {
-                "success": f"http://127.0.0.1:3000/pedidos/{order_id}",
-                "failure": f"http://127.0.0.1:3000/pedidos/{order_id}",
-                "pending": f"http://127.0.0.1:3000/pedidos/{order_id}"
-            },
-        }
-
-        return data
-
-        payament = self.sdk.preference().create(data)
-
-        return payament

@@ -4,6 +4,7 @@ from app.controllers.base.main_controller import MainController
 from app.utils.decorators import admin_required
 from typing import Any
 from decimal import Decimal
+import uuid
 
 bp = Blueprint('payments', __name__, url_prefix='/api')
 controller = MainController()
@@ -11,28 +12,19 @@ controller = MainController()
 @bp.route('/payments', methods=['POST'])
 def create_payment() -> tuple[Any, int]:
     try:
-        data = request.get_json()
-        
+        data = request.get_json()        
         order_id = data.get('order_id')
-        items = data.get('items')
-
-        payment_api = controller.payments.create_payament_api(order_id, items)
-        response = payment_api['response']
-
-        if payment_api['status'] not in [200, 201]:
-            return jsonify({ 'error': response }), 500
 
         payment = controller.payments.create_payment(
             order_id=order_id,
             payment_method=data.get('payment_method'),
             amount=Decimal(str(data.get('amount'))),
-            transaction_id=response['id']
+            transaction_id=str(uuid.uuid4())
         )
-        
+
         return jsonify({
             'message': 'Pagamento registrado com sucesso',
             'payament': payment.to_dict(),
-            'api': response
         }), 201
     except ValueError as e:
         return jsonify({'message': str(e)}), 400
