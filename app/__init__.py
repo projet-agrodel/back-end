@@ -54,7 +54,6 @@ def create_app(config_class=Config):
     CORS(app, origins=["http://localhost:3000", "http://frontend:3000"], supports_credentials=True)
 
     with app.app_context():
-        #deletar_tabelas(app)
         criar_tabelas(app)
         inserir_categorias(app)
         inserir_produtos(app)

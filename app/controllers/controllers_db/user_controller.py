@@ -26,6 +26,8 @@ class UserController(BaseController[User]):
                 'phone': data.get('phone'),
                 'type': user_type_enum
             })
+            db.session.add(new_user)
+            db.session.commit()
             return new_user
         except Exception as e:
             self._db.session.rollback()
@@ -57,26 +59,25 @@ class UserController(BaseController[User]):
             raise e
 
     def search_users(self, query: str) -> List[User]:
+        search_term = f"%{query}%"
         return self.get_query().filter(
-            (User.name.ilike(f'%{query}%')) |
-            (User.email.ilike(f'%{query}%'))
+            (User.name.ilike(search_term)) |
+            (User.email.ilike(search_term))
         ).all()
 
     def get_users_by_type(self, user_type: str) -> List[User]:
         return self.get_query().filter_by(type=user_type).all()
 
-    def get_user_by_id(user_id):
-        return User.query.get_or_404(user_id)
+    def get_user_by_id(self, user_id):
+        return self.get_query().get(user_id)
 
-    def delete_user(user_id):
-        user = User.query.get_or_404(user_id)
-        try:
+    def delete_user(self, user_id):
+        user = self.get_query().get(user_id)
+        if user:
             db.session.delete(user)
             db.session.commit()
             return True
-        except Exception as e:
-            db.session.rollback()
-            raise e
+        return False
 
     def change_password(self, user_id: int, current_password: str, new_password: str) -> bool:
         try:
@@ -95,4 +96,16 @@ class UserController(BaseController[User]):
         except Exception as e:
             self._db.session.rollback()
             # Logar o erro e.g., app.logger.error(f"Erro ao alterar senha: {str(e)}")
-            return False 
+            return False
+
+    def update_user_status(self, user_id: int, status: str) -> Optional[User]:
+        if status not in ['ativo', 'bloqueado']:
+            raise ValueError("Status inválido. Use 'ativo' ou 'bloqueado'.")
+
+        user = self.get_by_id(user_id)
+        if not user:
+            return None
+
+        user.status = status
+        self._db.session.commit()
+        return user 

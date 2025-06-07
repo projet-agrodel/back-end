@@ -21,7 +21,7 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
     
     # Relacionamentos
-    user = db.relationship('User', backref='orders')
+    user = db.relationship('User')
     items = db.relationship('OrderItem', backref='order', cascade='all, delete-orphan')
     payments = db.relationship('Payment', backref='order', cascade='all, delete-orphan')
     

@@ -5,6 +5,7 @@ from ..extensions import bcrypt, db
 from datetime import datetime, timedelta
 import secrets
 from ..services.email_service import send_reset_password_email
+from ..models.user import UserType
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 controller = MainController()
@@ -24,10 +25,17 @@ def login():
 
         # Verificar se usuário existe e a senha está correta
         if user and bcrypt.check_password_hash(user.password, password):
+            # Adicionar verificação de status do usuário
+            if user.status == 'bloqueado':
+                return jsonify({"message": "Esta conta está bloqueada. Entre em contato com o suporte."}), 403 # 403 Forbidden
+
+            # Adicionar claims de admin se o usuário for do tipo 'admin'
+            additional_claims = {}
+            if user.type == UserType.admin:
+                additional_claims["is_administrator"] = True
+
             # Senha correta, gerar token JWT
-            # A identidade do token deve ser uma string.
-            # O tempo de expiração pode ser configurado globalmente ou aqui
-            access_token = create_access_token(identity=str(user.id))
+            access_token = create_access_token(identity=str(user.id), additional_claims=additional_claims)
 
             user_data_for_response = {
                 "id": user.id,

@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.controllers.base.main_controller import MainController
 from app.utils.decorators import admin_required
 from typing import Any
@@ -123,4 +123,32 @@ def get_user_profile() -> tuple[Any, int]:
         
         return jsonify(user.to_dict()), 200
     except Exception as e:
-        return jsonify({'message': 'Erro ao buscar informações do perfil.'}), 500 
+        return jsonify({'message': 'Erro ao buscar informações do perfil.'}), 500
+
+@bp.route('/users/<int:user_id>/status', methods=['PATCH'])
+@jwt_required()
+def update_user_status(user_id: int):
+    # Verificação manual de admin
+    claims = get_jwt()
+    if not claims.get("is_administrator"):
+        return jsonify(msg="Acesso restrito para administradores!"), 403
+
+    data = request.get_json()
+    status = data.get('status')
+
+    if not status:
+        return jsonify({'message': 'O status é obrigatório.'}), 400
+
+    try:
+        user = controller.users.update_user_status(user_id, status)
+        if not user:
+            return jsonify({'message': 'Usuário não encontrado.'}), 404
+        
+        return jsonify({
+            'message': 'Status do usuário atualizado com sucesso.',
+            'user': user.to_dict()
+        }), 200
+    except ValueError as e:
+        return jsonify({'message': str(e)}), 400
+    except Exception as e:
+        return jsonify({'message': 'Ocorreu um erro ao atualizar o status do usuário.'}), 500 
