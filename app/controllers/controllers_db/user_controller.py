@@ -11,7 +11,7 @@ class UserController(BaseController[User]):
 
     def create_user(self, data: dict) -> User:
         try:
-            hashed_password = bcrypt.generate_password_hash(data['password'])
+            hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
             
             user_type_str = data.get('type', 'user')
             try:
