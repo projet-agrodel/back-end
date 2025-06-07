@@ -12,15 +12,6 @@ def create_app(config_class=Config):
     app = Flask(__name__, instance_relative_config=False) # Garantir que instance folder não interfira
     app.config.from_object(config_class)
 
-    # Calcular e definir caminho absoluto para o DB, sobrescrevendo .env se necessário
-    # app.root_path aponta para o diretório 'app', então subimos um nível
-    backend_dir = os.path.dirname(app.root_path)
-    db_path = os.path.join(backend_dir, 'test.db')
-    db_uri = f'sqlite:///{db_path}'
-    print(f"[INFO] Usando URI do Banco de Dados: {db_uri}") # Log para confirmação
-    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
-    app.config.pop('DATABASE_URL', None)
-
     # Inicializar extensões ANTES de registrar blueprints
     db.init_app(app)
     bcrypt.init_app(app)
