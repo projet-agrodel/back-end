@@ -5,7 +5,7 @@ from .config import Config
 # Importar instâncias das extensões
 from .extensions import db, bcrypt, jwt, mail
 from flask_migrate import Migrate
-from .services.database_manager import criar_tabelas, inserir_categorias, inserir_produtos, inserir_usuarios, inserir_clientes_ficticios
+from .services.database_manager import criar_tabelas, inserir_categorias,inserir_produtos, inserir_usuarios, inserir_clientes_ficticios
 from flask_jwt_extended import JWTManager
 
 def create_app(config_class=Config):

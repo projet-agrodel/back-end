@@ -151,4 +151,29 @@ def update_user_status(user_id: int):
     except ValueError as e:
         return jsonify({'message': str(e)}), 400
     except Exception as e:
-        return jsonify({'message': 'Ocorreu um erro ao atualizar o status do usuário.'}), 500 
+        return jsonify({'message': 'Ocorreu um erro ao atualizar o status do usuário.'}), 500
+
+@bp.route('/user/notification-settings', methods=['PUT'])
+@jwt_required()
+def update_notification_settings():
+    try:
+        user_id = get_jwt_identity()
+        data = request.get_json()
+
+        if 'notify_new_order' not in data and 'notify_stock_alert' not in data:
+            return jsonify({'message': 'Pelo menos uma configuração de notificação deve ser fornecida.'}), 400
+
+        user = controller.users.update_notification_settings(user_id, data)
+
+        if not user:
+            return jsonify({'message': 'Usuário não encontrado.'}), 404
+        
+        return jsonify({
+            'message': 'Configurações de notificação atualizadas com sucesso.',
+            'settings': {
+                'notify_new_order': user.notify_new_order,
+                'notify_stock_alert': user.notify_stock_alert
+            }
+        }), 200
+    except Exception as e:
+        return jsonify({'message': 'Ocorreu um erro ao atualizar as configurações de notificação.'}), 500 

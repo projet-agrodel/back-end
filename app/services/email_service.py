@@ -1,7 +1,9 @@
-from flask import current_app
+from flask import current_app, render_template
 from flask_mail import Message # Importar Message do Flask-Mail
 from ..extensions import mail # Importar a instância mail do Flask-Mail
 import logging # Para logging
+from ..models.user import User, UserType
+from ..models.order import Order
 
 # Configurar um logger básico para o serviço de email
 logger = logging.getLogger(__name__)
@@ -79,4 +81,44 @@ Equipe AgroDel
         print(f"Assunto: {subject}")
         print(f"Link (simulado): {reset_url}")
         print("---- FIM DA SIMULAÇÃO ----")
-    pass 
+    pass
+
+def send_new_order_notification(order: Order):
+    """
+    Envia um email de notificação de novo pedido para todos os administradores que optaram por recebê-lo.
+    """
+    try:
+        with current_app.app_context():
+            admins_to_notify = User.query.filter_by(
+                type=UserType.admin, 
+                notify_new_order=True
+            ).all()
+
+            if not admins_to_notify:
+                logger.info("Nenhum administrador para notificar sobre o novo pedido.")
+                return
+
+            frontend_url = current_app.config.get('FRONTEND_URL', 'http://localhost:3000')
+            order_url = f"{frontend_url}/admin/orders/{order.id}"
+            subject = f"Novo Pedido Recebido: #{order.id}"
+
+            for admin in admins_to_notify:
+                html_body = render_template(
+                    'email/new_order_notification.html',
+                    admin_name=admin.name,
+                    order=order,
+                    order_url=order_url
+                )
+                
+                msg = Message(
+                    subject=subject,
+                    recipients=[admin.email],
+                    html=html_body
+                )
+                
+                mail.send(msg)
+                logger.info(f"Email de notificação de novo pedido #{order.id} enviado para {admin.email}.")
+
+    except Exception as e:
+        logger.error(f"Falha ao enviar e-mails de notificação de novo pedido: {e}")
+        print(f"---- ERRO ao enviar e-mails de notificação para o pedido #{order.id}: {e} ----") 

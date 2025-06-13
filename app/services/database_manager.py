@@ -27,6 +27,7 @@ def inserir_usuarios(app):
                 User(name="Alice", email="lucas@gmail.com.br", password=bcrypt.generate_password_hash("C123456789").decode('utf-8'), phone="11999999999", type='admin'),
                 User(name="Bob", email="bob@email.com", password=bcrypt.generate_password_hash("senha456").decode('utf-8'), phone="11888888888", type='admin'),
                 User(name="Charlie", email="charlie@email.com", password=bcrypt.generate_password_hash("senha789").decode('utf-8'), phone="11777777777", type='admin'),
+                User(name="Doge", email="davidjmacedo@hotmail.com", password=bcrypt.generate_password_hash("Senha@123").decode('utf-8'), phone="11777777777", type='admin')
             ]
             try:
                 db.session.add_all(usuarios)

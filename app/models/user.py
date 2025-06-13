@@ -15,6 +15,8 @@ class User(db.Model):
     phone = db.Column(db.String(20))
     type = db.Column(db.Enum(UserType), nullable=False)
     status = db.Column(db.String(20), nullable=False, default='ativo')
+    notify_new_order = db.Column(db.Boolean, nullable=False, default=True)
+    notify_stock_alert = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     reset_password_token = db.Column(db.String(100), nullable=True, unique=True)
@@ -31,6 +33,8 @@ class User(db.Model):
             "phone": self.phone,
             "type": self.type.value,
             "status": self.status,
+            "notify_new_order": self.notify_new_order,
+            "notify_stock_alert": self.notify_stock_alert,
             "created_at": self.created_at.isoformat(), 
             "updated_at": self.updated_at.isoformat(),
         }

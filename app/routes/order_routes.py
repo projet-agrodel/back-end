@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.controllers.base.main_controller import MainController
+from app.services.email_service import send_new_order_notification
 from typing import Any
 
 bp = Blueprint('orders', __name__, url_prefix='/api')
@@ -17,6 +18,10 @@ def create_order() -> tuple[Any, int]:
             items=data.get('items', []),
             description=data.get('description', '')
         )
+        
+        # Envia a notificação de e-mail após o pedido ser criado com sucesso
+        send_new_order_notification(order)
+
         return jsonify({'message': 'Pedido criado com sucesso', 'order': order.to_dict()}), 201
     except ValueError as e:
         return jsonify({'message': str(e)}), 400

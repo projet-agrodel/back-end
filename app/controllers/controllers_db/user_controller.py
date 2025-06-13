@@ -108,4 +108,18 @@ class UserController(BaseController[User]):
 
         user.status = status
         self._db.session.commit()
+        return user
+
+    def update_notification_settings(self, user_id: int, settings: dict) -> Optional[User]:
+        user = self.get_by_id(user_id)
+        if not user:
+            return None
+
+        if 'notify_new_order' in settings:
+            user.notify_new_order = bool(settings['notify_new_order'])
+        
+        if 'notify_stock_alert' in settings:
+            user.notify_stock_alert = bool(settings['notify_stock_alert'])
+
+        self._db.session.commit()
         return user 
