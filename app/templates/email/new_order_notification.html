@@ -28,9 +28,9 @@
                 <li><strong>Valor Total:</strong> R$ {{ "%.2f"|format(order.amount) }}</li>
                 <li><strong>Data do Pedido:</strong> {{ order.created_at.strftime('%d/%m/%Y %H:%M') }}</li>
             </ul>
-            <p>Para visualizar os detalhes completos do pedido, clique no botão abaixo:</p>
+            <p>Para visualizar este e outros pedidos pendentes, clique no botão abaixo:</p>
             <p style="text-align: center;">
-                <a href="{{ order_url }}" class="button">Ver Pedido no Painel</a>
+                <a href="{{ order_url }}" class="button">Ver Pedidos no Painel</a>
             </p>
             <p>Atenciosamente,<br>
             Sistema AgroDel</p>

@@ -5,6 +5,9 @@ from app.models.user import User
 from app.controllers.base.base_controller import BaseController
 from decimal import Decimal
 from ..base.main_controller import MainController
+from app.services.email_service import send_stock_alert_email
+
+STOCK_ALERT_THRESHOLD = 5
 
 class OrderController(BaseController[Order]):
     def __init__(self, client: MainController) -> None:
@@ -44,7 +47,14 @@ class OrderController(BaseController[Order]):
                     price=item['amount']
                 )
                 self._db.session.add(order_item)
-                item['product'].stock -= item['quantity']
+                
+                # Atualiza o estoque
+                product = item['product']
+                product.stock -= item['quantity']
+
+                # Verifica se o estoque atingiu o nível de alerta
+                if product.stock <= STOCK_ALERT_THRESHOLD:
+                    send_stock_alert_email(product)
 
             self._db.session.commit()
             return order

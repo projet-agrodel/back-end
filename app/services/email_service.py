@@ -4,6 +4,7 @@ from ..extensions import mail # Importar a instância mail do Flask-Mail
 import logging # Para logging
 from ..models.user import User, UserType
 from ..models.order import Order
+from ..models.product import Product
 
 # Configurar um logger básico para o serviço de email
 logger = logging.getLogger(__name__)
@@ -99,7 +100,7 @@ def send_new_order_notification(order: Order):
                 return
 
             frontend_url = current_app.config.get('FRONTEND_URL', 'http://localhost:3000')
-            order_url = f"{frontend_url}/admin/orders/{order.id}"
+            order_url = f"{frontend_url}/admin/orders"
             subject = f"Novo Pedido Recebido: #{order.id}"
 
             for admin in admins_to_notify:
@@ -121,4 +122,44 @@ def send_new_order_notification(order: Order):
 
     except Exception as e:
         logger.error(f"Falha ao enviar e-mails de notificação de novo pedido: {e}")
-        print(f"---- ERRO ao enviar e-mails de notificação para o pedido #{order.id}: {e} ----") 
+        print(f"---- ERRO ao enviar e-mails de notificação para o pedido #{order.id}: {e} ----")
+
+def send_stock_alert_email(product: Product):
+    """
+    Envia um email de notificação de estoque baixo para os administradores que optaram por recebê-lo.
+    """
+    try:
+        with current_app.app_context():
+            admins_to_notify = User.query.filter_by(
+                type=UserType.admin,
+                notify_stock_alert=True
+            ).all()
+
+            if not admins_to_notify:
+                logger.info(f"Nenhum administrador para notificar sobre o estoque do produto #{product.id}.")
+                return
+
+            frontend_url = current_app.config.get('FRONTEND_URL', 'http://localhost:3000')
+            product_url = f"{frontend_url}/admin/products"
+            subject = f"Alerta de Estoque Baixo: {product.name}"
+
+            for admin in admins_to_notify:
+                html_body = render_template(
+                    'email/stock_alert_notification.html',
+                    admin_name=admin.name,
+                    product=product,
+                    product_url=product_url
+                )
+
+                msg = Message(
+                    subject=subject,
+                    recipients=[admin.email],
+                    html=html_body
+                )
+
+                mail.send(msg)
+                logger.info(f"Email de alerta de estoque para o produto #{product.id} enviado para {admin.email}.")
+
+    except Exception as e:
+        logger.error(f"Falha ao enviar e-mails de alerta de estoque para o produto #{product.id}: {e}")
+        print(f"---- ERRO ao enviar e-mails de alerta de estoque para o produto #{product.id}: {e} ----") 
