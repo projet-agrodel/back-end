@@ -4,6 +4,23 @@ from app.utils.decorators import admin_required
 
 bp = Blueprint('admin_analytics', __name__, url_prefix='/admin/analytics')
 
+# --- Rotas para o Dashboard Principal do Admin ---
+@bp.route('/dashboard/summary', methods=['GET'])
+@admin_required()
+def get_dashboard_summary():
+    return AdminAnalyticsController.get_dashboard_summary_data()
+
+@bp.route('/dashboard/monthly-sales', methods=['GET'])
+@admin_required()
+def get_monthly_sales():
+    return AdminAnalyticsController.get_monthly_sales_data()
+
+@bp.route('/dashboard/recent-sales', methods=['GET'])
+@admin_required()
+def get_recent_sales():
+    return AdminAnalyticsController.get_recent_sales_data()
+
+# --- Rotas existentes ---
 @bp.route('/sales-by-category', methods=['GET'])
 @admin_required()
 def sales_by_category():
@@ -60,4 +77,4 @@ def taxa_conversao_summary():
 @bp.route('/visitantes-unicos/details', methods=['GET'])
 @admin_required()
 def visitantes_unicos_details():
-    return AdminAnalyticsController.get_visitantes_unicos_details_data() 
+    return AdminAnalyticsController.get_visitantes_unicos_details_data()
