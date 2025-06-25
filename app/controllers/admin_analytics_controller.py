@@ -1,7 +1,7 @@
 from flask import jsonify, request
-from flask import jsonify, request
 from datetime import datetime, timedelta
 from decimal import Decimal
+from app.controllers.base.main_controller import MainController # Importar MainController
 
 # Dados fictícios fixos para Ticket Médio
 mock_ticket_medio_evolution_data = [
@@ -72,18 +72,34 @@ mock_visitantes_unicos_summary_cards_data = {
 }
 
 class AdminAnalyticsController:
-    # --- Métodos para o Dashboard Principal do Admin (Dados Fixos) ---
+    # --- Métodos para o Dashboard Principal do Admin (Dados Reais) ---
     @staticmethod
     def get_dashboard_summary_data():
+        controller = MainController()
+        
+        # Total de Usuários Cadastrados
+        total_users = len(controller.users.get_all())
+
+        # Total de Produtos Cadastrados
+        total_products = len(controller.products.get_all())
+
+        # Total de Vendas e Receita
+        all_orders = controller.orders.get_all() # Já carrega user e items
+        total_sales_count = len(all_orders)
+        total_revenue = Decimal('0.0')
+        for order in all_orders:
+            total_revenue += sum(item.price * item.quantity for item in order.items)
+
         return jsonify({
-            "activeUsers": 1500,
-            "totalSalesCount": 750,
-            "totalRevenue": 65000.00,
-            "productCount": 250
+            "activeUsers": total_users, # Renomeado para total_users no frontend
+            "totalSalesCount": total_sales_count,
+            "totalRevenue": float(total_revenue), # Converter Decimal para float
+            "productCount": total_products
         }), 200
 
     @staticmethod
     def get_monthly_sales_data():
+        # Manter dados mockados ou implementar lógica real se necessário
         monthly_data = [
             {"month": "Jan", "sales": 7000.00, "revenue": 9000.00},
             {"month": "Fev", "sales": 6500.00, "revenue": 8500.00},
@@ -96,19 +112,24 @@ class AdminAnalyticsController:
 
     @staticmethod
     def get_recent_sales_data():
-        recent_sales = [
-            {"id": "ORD-001", "customer": "João Silva", "date": "2024-07-27", "total": 150.00, "status": "Concluído"},
-            {"id": "ORD-002", "customer": "Maria Oliveira", "date": "2024-07-26", "total": 85.50, "status": "Pendente"},
-            {"id": "ORD-003", "customer": "Carlos Souza", "date": "2024-07-26", "total": 210.75, "status": "Concluído"},
-            {"id": "ORD-004", "customer": "Ana Pereira", "date": "2024-07-25", "total": 55.00, "status": "Enviado"},
-            {"id": "ORD-005", "customer": "Pedro Costa", "date": "2024-07-25", "total": 320.00, "status": "Concluído"},
-            {"id": "ORD-006", "customer": "Luiza Santos", "date": "2024-07-24", "total": 99.90, "status": "Concluído"},
-            {"id": "ORD-007", "customer": "Gabriel Lima", "date": "2024-07-24", "total": 180.00, "status": "Pendente"},
-            {"id": "ORD-008", "customer": "Sofia Almeida", "date": "2024-07-23", "total": 75.20, "status": "Concluído"},
-            {"id": "ORD-009", "customer": "Bruno Mendes", "date": "2024-07-23", "total": 250.00, "status": "Enviado"},
-            {"id": "ORD-010", "customer": "Clara Ribeiro", "date": "2024-07-22", "total": 120.00, "status": "Concluído"},
-        ]
-        return jsonify(recent_sales), 200
+        controller = MainController()
+        all_orders = controller.orders.get_all()
+        recent_orders = sorted(all_orders, key=lambda x: x.created_at, reverse=True)[:10]
+        
+        mapped_sales = []
+        for order in recent_orders:
+            total_amount = sum(item.price * item.quantity for item in order.items)
+            customer_name = order.user.name if order.user else "N/A"
+
+            mapped_sales.append({
+                "id": f"ORD-{order.id}",
+                "customer": customer_name,
+                "date": order.created_at.isoformat(),
+                "total": float(total_amount),
+                "status": order.status.value
+            })
+        
+        return jsonify(mapped_sales), 200
 
     # --- Métodos existentes (Dados Fixos) ---
     @staticmethod
