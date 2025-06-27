@@ -19,6 +19,9 @@ def create_app(config_class=Config):
     Migrate(app, db)
     mail.init_app(app)
 
+    # Configurar CORS o mais cedo possível
+    CORS(app, origins="*", supports_credentials=True) # Temporariamente mais permissivo para depuração
+
     from .routes import (
         user_routes, product_routes, ticket_routes,
         category_routes, order_routes, payment_routes,
@@ -41,9 +44,6 @@ def create_app(config_class=Config):
     app.register_blueprint(admin_routes.admin_bp)
     app.register_blueprint(admin_analytics_routes.bp)
 
-    # Configurar CORS DEPOIS de registrar todos os blueprints
-    CORS(app, origins=["http://localhost:3000", "http://frontend:3000"], supports_credentials=True)
-
     with app.app_context():
         criar_tabelas(app)
         inserir_categorias(app)
@@ -51,4 +51,4 @@ def create_app(config_class=Config):
         inserir_usuarios(app)
         inserir_clientes_ficticios(app)
 
-    return app 
+    return app

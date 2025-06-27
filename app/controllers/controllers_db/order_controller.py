@@ -4,6 +4,8 @@ from app.models.product import Product
 from app.models.user import User
 from app.controllers.base.base_controller import BaseController
 from decimal import Decimal
+from sqlalchemy import or_
+from sqlalchemy.orm import joinedload
 from ..base.main_controller import MainController
 from app.services.email_service import send_stock_alert_email
 
@@ -12,6 +14,12 @@ STOCK_ALERT_THRESHOLD = 5
 class OrderController(BaseController[Order]):
     def __init__(self, client: MainController) -> None:
         super().__init__(Order, client)
+
+    def get_all(self) -> List[Order]:
+        return self.get_query().options(
+            joinedload(Order.user),
+            joinedload(Order.items).joinedload(OrderItem.product)
+        ).all()
 
     def create_order(self, user_id: int, items: List[Dict], description: bytes) -> Order:
         try:
